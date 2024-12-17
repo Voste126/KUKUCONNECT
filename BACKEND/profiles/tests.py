@@ -56,3 +56,5 @@ def test_create_buyer_profile(api_client, create_user, get_token):
     response = api_client.post('/api/profiles/buyers/', data)
     assert response.status_code == status.HTTP_201_CREATED
     assert response.data['business_name'] == 'Fresh Produce Ltd'
+
+#test for updating a particular farmer profile and buyer profile
