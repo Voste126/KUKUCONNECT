@@ -1,38 +1,65 @@
-from django.shortcuts import render
-
-# Create your views here.
 from rest_framework import generics, permissions
-from .models import Product
-from .serializers import ProductSerializer
-from drf_yasg.utils import swagger_auto_schema
+from .models import Product, Order
+from .serializers import ProductSerializer, OrderSerializer
 
 class ProductListView(generics.ListAPIView):
-    serializer_class = ProductSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    def get_queryset(self):
-        user = self.request.user
-        return Product.objects.filter(farmer=user).order_by("-created_at")
-
-class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+class ProductDetailView(generics.RetrieveAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
 class ProductCreateView(generics.CreateAPIView):
+    queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def perform_create(self, serializer):
-        serializer.save(farmer=self.request.user)
+class OrderCreateView(generics.CreateAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class OrderDetailView(generics.RetrieveDestroyAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        """
+        Ensure the authenticated user can only delete their own orders.
+        """
+        return self.queryset.filter(buyer=self.request.user)
+
+class MarketplaceView(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
 
 class FarmerProductListView(generics.ListAPIView):
     serializer_class = ProductSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    @swagger_auto_schema(operation_description="Retrieve products for the authenticated farmer")
     def get_queryset(self):
         user = self.request.user
         if user.is_authenticated:
-            return Product.objects.filter(farmer=user).order_by("-created_at")
-        else:
-            return Product.objects.none()
+            return Product.objects.filter(farmer=user)
+        return Product.objects.none()
+    
+class FarmerOrdersView(generics.ListAPIView):
+    serializer_class = OrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # Filter orders by the farmer's products
+        farmer = self.request.user
+        return Order.objects.filter(items__product__farmer=farmer).distinct()
+
+class BuyerOrdersView(generics.ListAPIView):
+    serializer_class = OrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # Filter orders by the authenticated buyer
+        buyer = self.request.user
+        return Order.objects.filter(buyer=buyer)
