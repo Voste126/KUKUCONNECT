@@ -1,0 +1,38 @@
+/* LoginPage.module.css */
+.container {
+    background-color: #F5F5DC; /* themeColors.background */
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    max-width: 400px;
+    margin: 50px auto;
+}
+
+.title {
+    font-family: 'Greycliff CF', sans-serif;
+    color: #2F4F4F; /* themeColors.text */
+    text-align: center;
+    font-weight: 700;
+}
+
+.textInput {
+    margin-bottom: 20px;
+}
+
+.buttonGroup {
+    display: flex;
+    justify-content: center;
+}
+
+.button {
+    background-color: #006400; /* themeColors.primary */
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover {
+    background-color: #8B4513; /* themeColors.secondary */
+}
