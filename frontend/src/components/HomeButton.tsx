@@ -1,11 +1,13 @@
 import { Container, Grid, Text, Title, Button,  Group, Box, Center } from '@mantine/core';
-// import Image from '@mantine/core';
+
 // import heroImage from '../assets/hero2.jpg';
 
 const themeColors = {
-  primary: '#28A745', // Green
-  secondary: '#007BFF', // Blue
-  background: '#FFFFFF', // White
+  primary: '#006400',  // Green
+  secondary: '#8B4513', // Blue
+  background: '#F5F5DC',
+  text: '#2F4F4F' ,
+  Accent: '#FFD700 ',
 };
 
 export function Home() {
@@ -15,7 +17,7 @@ export function Home() {
       <Container>
         <Grid align="center">
           <Grid.Col span={12} >
-            <Title order={1} style={{ color: themeColors.primary, fontSize: '2.5rem' }}>
+            <Title order={1} style={{ color: '#006400', fontSize: '2.5rem' }}>
               Welcome to KUKUCONNECT
             </Title>
             <Text size="lg" style={{ color: themeColors.secondary, marginTop: '1rem' }}>
