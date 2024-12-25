@@ -1,6 +1,6 @@
 import { Container, Grid, Text, Title, Button,  Group, Box, Center } from '@mantine/core';
 
-// import heroImage from '../assets/hero2.jpg';
+import heroImage from '../assets/hero3.jpg';
 
 const themeColors = {
   primary: '#006400',  // Green
@@ -14,35 +14,81 @@ export function Home() {
   return (
     <Box style={{ backgroundColor: 'transparent', minHeight: '100vh', padding: '2rem' }}>
       {/* Hero Section */}
-      <Container>
-        <Grid align="center">
-          <Grid.Col span={12} >
-            <Title order={1} style={{ color: '#006400', fontSize: '2.5rem' }}>
-              Welcome to KUKUCONNECT
-            </Title>
-            <Text size="lg" style={{ color: themeColors.secondary, marginTop: '1rem' }}>
-              The modern AgriTech solution for farmers, suppliers, and buyers. Empowering communities
-              with digital tools to connect, trade, and innovate.
-            </Text>
-            <Group mt="xl">
-              <Button size="lg" radius="xl" style={{ backgroundColor: themeColors.primary }}>
-                Get Started
-              </Button>
-              <Button
-                size="lg"
-                radius="xl"
-                variant="outline"
-                style={{ borderColor: themeColors.primary, color: themeColors.primary }}
-              >
-                Learn More
-              </Button>
-            </Group>
-          </Grid.Col>
-          <Grid.Col span={12} >
-            {/* t<Image src={heroImage} alt="Hero Image" fit="contain" style={{ maxHeight: 400 }} /> */}
-          </Grid.Col>
-        </Grid>
-      </Container>
+      <Container
+  style={{
+    height: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '2rem 4rem', // Adds padding around the container
+  }}
+>
+  <Grid justify="space-between" align="center" style={{ width: '100%' }}>
+    {/* Left Column: Text */}
+    <Grid.Col span={6} style={{ textAlign: 'left', paddingRight: '2rem' }}>
+      <Title
+        order={1}
+        style={{
+          color: '#006400', // Dark Green
+          fontSize: '3rem',
+          fontWeight: 800,
+          marginBottom: '1rem', // Adds spacing below the title
+        }}
+      >
+        Welcome to KUKUCONNECT
+      </Title>
+      <Text
+        size="lg"
+        style={{
+          color: '#333333', // Dark Gray
+          marginBottom: '2rem', // Adds spacing below the description
+        }}
+      >
+        The modern AgriTech solution for farmers, suppliers, and buyers. Empowering communities
+        with digital tools to connect, trade, and innovate.
+      </Text>
+      <Group>
+        <Button
+          size="lg"
+          radius="xl"
+          style={{
+            backgroundColor: themeColors.primary,
+            padding: '0.75rem 2rem', // Enlarges button for better appearance
+          }}
+        >
+          Get Started
+        </Button>
+        <Button
+          size="lg"
+          radius="xl"
+          variant="outline"
+          style={{
+            borderColor: themeColors.primary,
+            color: themeColors.primary,
+            padding: '0.75rem 2rem', // Enlarges button for better appearance
+          }}
+        >
+          Learn More
+        </Button>
+      </Group>
+    </Grid.Col>
+
+    {/* Right Column: Main Image */}
+    <Grid.Col span={6} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <img
+        src={heroImage} // Replace with your actual image URL
+        alt="Hero Image"
+        style={{
+          width: '100%',
+          maxWidth: '650px', // Enlarged the image slightly
+          borderRadius: '10px',
+          boxShadow: '0px 4px 15px rgba(0, 0, 0, 0.3)', // Enhanced shadow for depth
+        }}
+      />
+    </Grid.Col>
+  </Grid>
+</Container>
+
 
       {/* Features Section */}
       <Box style={{ backgroundColor: themeColors.primary, padding: '4rem 2rem', marginTop: '3rem' }}>
