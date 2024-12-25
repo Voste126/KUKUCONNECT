@@ -3,12 +3,11 @@ import './App.css';
 import { AppShell, Title, Burger, Flex, Button, useMantineColorScheme, useComputedColorScheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { FaMoon, FaSun } from 'react-icons/fa';
-import Home from './components/HomeButton';
 import chickenLogo from './assets/KCNlogo.png';
 import { DoubleNavbar } from './components/Navbar';
-
-
+import RouterSwithcer from './components/RouterSwitcher';
 function App() {
+  
   const [opened, { toggle }] = useDisclosure();
   const { setColorScheme } = useMantineColorScheme();
   const computedColorScheme = useComputedColorScheme();
@@ -58,7 +57,8 @@ function App() {
 
         <AppShell.Main>
           {/* Display my contents according to my clicks on my navbar */}
-          <Home />
+          {/* Add the Router swithcer here */}
+          <RouterSwithcer />
         </AppShell.Main>
 
         <AppShell.Footer>

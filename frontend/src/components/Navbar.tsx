@@ -1,40 +1,47 @@
 import { useState } from 'react';
 import {
   IconCalendarStats,
-  IconDeviceDesktopAnalytics,
   IconFingerprint,
+  IconShoppingCart,
   IconGauge,
   IconHome2,
   IconSettings,
   IconUser,
+  IconLogout,
 } from '@tabler/icons-react';
 import { Title, Tooltip, UnstyledButton } from '@mantine/core';
 // import { MantineLogo } from '@mantinex/mantine-logo';
 import classes from './DoubleNavbar.module.css';
+import { useNavigate } from 'react-router-dom';
 
 const mainLinksMockdata = [
-  { icon: IconHome2, label: 'Home' },
-  { icon: IconGauge, label: 'Dashboard' },
-  { icon: IconDeviceDesktopAnalytics, label: 'Analytics' },
-  { icon: IconCalendarStats, label: 'Releases' },
-  { icon: IconUser, label: 'Account' },
-  { icon: IconFingerprint, label: 'SignUp' },
-  { icon: IconSettings, label: 'Settings' },
+  { icon: IconHome2, label: 'Home', path: '/' },
+  { icon: IconGauge, label: 'Dashboard', path: '/dashboard' },
+  { icon: IconShoppingCart, label: 'Digital Market', path: '/digital-market' },
+  { icon: IconCalendarStats, label: 'Releases', path: '/releases' },
+  { icon: IconUser, label: 'Account', path: '/account' },
+  { icon: IconFingerprint, label: 'SignUp', path: '/signup' },
+  { icon: IconFingerprint, label: 'SignUp', path: '/login' },
+  { icon: IconSettings, label: 'Settings', path: '/settings' },
+  { icon: IconLogout, label: 'Logout', path: '/logout' },
 ];
 
 const linksMockdata = [
-    'Home',
-    'Dashboard',
-    'Digital Market',
-    'AI/IoT',
-    'Account',
-    'SignUp',
-    'Logout',
+  { label: 'Home', path: '/' },
+  { label: 'Dashboard', path: '/dashboard' },
+  { label: 'Digital Market', path: '/digital-market' },
+  { label: 'AI/IoT', path: '/ai-iot' },
+  { label: 'Account', path: '/account' },
+  { label: 'SignUp', path: '/signup' },
+  { label: 'Login', path: '/login' },
+  { label: 'Settings', path: '/settings' },
+  { label: 'Logout', path: '/logout' },
 ];
 
 export function DoubleNavbar() {
   const [active, setActive] = useState('Menu');
   const [activeLink, setActiveLink] = useState('Settings');
+  const navigate = useNavigate();
 
   const mainLinks = mainLinksMockdata.map((link) => (
     <Tooltip
@@ -45,7 +52,10 @@ export function DoubleNavbar() {
       key={link.label}
     >
       <UnstyledButton
-        onClick={() => setActive(link.label)}
+        onClick={() => {
+          setActive(link.label);
+          navigate(link.path);
+        }}
         className={classes.mainLink}
         data-active={link.label === active || undefined}
       >
@@ -57,15 +67,16 @@ export function DoubleNavbar() {
   const links = linksMockdata.map((link) => (
     <a
       className={classes.link}
-      data-active={activeLink === link || undefined}
+      data-active={activeLink === link.label || undefined}
       href="#"
       onClick={(event) => {
         event.preventDefault();
-        setActiveLink(link);
+        setActiveLink(link.label);
+        navigate(link.path);
       }}
-      key={link}
+      key={link.label}
     >
-      {link}
+      {link.label}
     </a>
   ));
 
