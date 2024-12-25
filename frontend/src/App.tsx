@@ -56,8 +56,6 @@ function App() {
         </AppShell.Navbar>
 
         <AppShell.Main>
-          {/* Display my contents according to my clicks on my navbar */}
-          {/* Add the Router swithcer here */}
           <RouterSwithcer />
         </AppShell.Main>
 

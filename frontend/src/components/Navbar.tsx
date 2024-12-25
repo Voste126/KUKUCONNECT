@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import {
-  IconCalendarStats,
   IconFingerprint,
   IconShoppingCart,
+  IconBrain,
   IconGauge,
   IconHome2,
   IconSettings,
@@ -18,7 +18,7 @@ const mainLinksMockdata = [
   { icon: IconHome2, label: 'Home', path: '/' },
   { icon: IconGauge, label: 'Dashboard', path: '/dashboard' },
   { icon: IconShoppingCart, label: 'Digital Market', path: '/digital-market' },
-  { icon: IconCalendarStats, label: 'Releases', path: '/releases' },
+  { icon: IconBrain, label: 'AI/IoT', path: '/ai-iot' },
   { icon: IconUser, label: 'Account', path: '/account' },
   { icon: IconFingerprint, label: 'SignUp', path: '/signup' },
   { icon: IconFingerprint, label: 'SignUp', path: '/login' },
@@ -40,45 +40,45 @@ const linksMockdata = [
 
 export function DoubleNavbar() {
   const [active, setActive] = useState('Menu');
-  const [activeLink, setActiveLink] = useState('Settings');
+  const [activeLink, setActiveLink] = useState('Home');
   const navigate = useNavigate();
 
   const mainLinks = mainLinksMockdata.map((link) => (
-    <Tooltip
-      label={link.label}
-      position="right"
-      withArrow
-      transitionProps={{ duration: 0 }}
-      key={link.label}
-    >
-      <UnstyledButton
-        onClick={() => {
-          setActive(link.label);
-          navigate(link.path);
-        }}
-        className={classes.mainLink}
-        data-active={link.label === active || undefined}
-      >
-        <link.icon size={22} stroke={1.5} />
-      </UnstyledButton>
-    </Tooltip>
-  ));
-
-  const links = linksMockdata.map((link) => (
-    <a
-      className={classes.link}
-      data-active={activeLink === link.label || undefined}
-      href="#"
-      onClick={(event) => {
-        event.preventDefault();
-        setActiveLink(link.label);
+  <Tooltip
+    label={link.label}
+    position="right"
+    withArrow
+    transitionProps={{ duration: 0 }}
+    key={link.label + link.path} // Ensure unique key by combining label and path
+  >
+    <UnstyledButton
+      onClick={() => {
+        setActive(link.label);
         navigate(link.path);
       }}
-      key={link.label}
+      className={classes.mainLink}
+      data-active={link.label === active || undefined}
     >
-      {link.label}
-    </a>
-  ));
+      <link.icon size={22} stroke={1.5} />
+    </UnstyledButton>
+  </Tooltip>
+));
+
+  const links = linksMockdata.map((link) => (
+  <a
+    className={classes.link}
+    data-active={activeLink === link.label || undefined}
+    href="#"
+    onClick={(event) => {
+      event.preventDefault();
+      setActiveLink(link.label);
+      navigate(link.path);
+    }}
+    key={link.label + link.path} // Ensure unique key by combining label and path
+  >
+    {link.label}
+  </a>
+));
 
   return (
     <nav className={classes.navbar}>
