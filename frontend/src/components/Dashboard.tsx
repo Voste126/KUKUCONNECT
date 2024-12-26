@@ -1,57 +1,163 @@
+// Dashboard.tsx
+import  { useState } from 'react';
 import {
-    Typography,
-    Box,
-    Container,
-    Card,
-    CardContent,
-} from "@mui/material";
-import { Line } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+  AppShell,
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+  Table,
+  Button,
+  Group,
+  Text,
+  Container,
+  Card,
+  Grid,
+  Title,
+} from '@mantine/core';
+import { AreaChart, CompositeChart, RadarChart } from '@mantine/charts';
+import { data as areaData } from './areaData.ts';
+import { data as compositeData } from './compositeData.ts';
+import { data as radarData } from './radarData.ts';
 
-const chartData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-    datasets: [
-        {
-            label: "Revenue",
-            data: [12000, 19000, 3000, 5000, 20000, 15000],
-            backgroundColor: "rgba(75,192,192,0.2)",
-            borderColor: "rgba(75,192,192,1)",
-            borderWidth: 2,
-        },
-    ],
+const Dashboard = () => {
+  const [products, setProducts] = useState([
+    { id: 1, name: 'Chicken Meat', category: 'Meat', stock: 200, price: '$5/kg' },
+    { id: 2, name: 'Eggs', category: 'Poultry', stock: 300, price: '$2/dozen' },
+    { id: 3, name: 'Organic Sawdust', category: 'Byproduct', stock: 100, price: '$1/bag' },
+  ]);
+
+  const handleEdit = (id: number) => {
+    alert(`Edit product with ID: ${id}`);
+  };
+
+  const handleDelete = (id: number) => {
+    setProducts(products.filter((product) => product.id !== id));
+  };
+
+  const handleAddProduct = () => {
+    const newProduct = { id: Date.now(), name: 'New Product', category: 'Category', stock: 50, price: '$10' };
+    setProducts([...products, newProduct]);
+  };
+
+  return (
+    <AppShell
+      padding="md"
+    //   navbar={
+    //     <Navbar width={{ base: 300 }} p="xs">
+    //       <Title order={3} style={{ color: '#9E6D29' }}>
+    //         Admin Panel
+    //       </Title>
+    //       <Text>Manage products and view insights.</Text>
+    //     </Navbar>
+    //   }
+    //   header={
+    //     <Header height={60} p="xs">
+    //       <Title order={2} style={{ color: '#FFE000' }}>
+    //         Poultry Dashboard
+    //       </Title>
+    //     </Header>
+    //   }
+    >
+      <Container size="lg">
+        {/* Revenue and Sales */}
+        <Grid>
+          <Grid.Col span={6}>
+            <Card shadow="sm" p="lg" style={{ backgroundColor: 'darkgreen', color: '#fff' }}>
+              <Title order={3}>Revenue</Title>
+              <Text size="xl">$12,340</Text>
+            </Card>
+          </Grid.Col>
+          <Grid.Col span={6}>
+            <Card shadow="sm" p="lg" style={{ backgroundColor: '#9E6D29', color: '#fff' }}>
+              <Title order={3}>Sales</Title>
+              <Text size="xl">450 Units</Text>
+            </Card>
+          </Grid.Col>
+        </Grid>
+
+        {/* Charts */}
+        <Grid mt="xl">
+          <Grid.Col span={12}>
+            <Title order={4} mb="sm">Sales Trends</Title>
+            <AreaChart
+              h={300}
+              data={areaData}
+              dataKey="date"
+              series={[{ name: 'Apples', color: 'indigo.6' }]}
+              curveType="linear"
+              connectNulls
+            />
+          </Grid.Col>
+          <Grid.Col span={12} mt="xl">
+            <Title order={4} mb="sm">Product Performance</Title>
+            <CompositeChart
+              h={300}
+              data={compositeData}
+              dataKey="date"
+              withLegend
+              maxBarWidth={30}
+              series={[
+                { name: 'Tomatoes', color: 'rgba(18, 120, 255, 0.2)', type: 'bar' },
+                { name: 'Apples', color: 'red.8', type: 'line' },
+                { name: 'Oranges', color: 'yellow.8', type: 'area' },
+              ]}
+            />
+          </Grid.Col>
+          <Grid.Col span={12} mt="xl">
+            <Title order={4} mb="sm">Monthly Comparisons</Title>
+            <RadarChart
+              h={300}
+              data={radarData}
+              dataKey="product"
+              withPolarRadiusAxis
+              series={[
+                { name: 'Sales January', color: 'lime.4', opacity: 0.1 },
+                { name: 'Sales February', color: 'cyan.4', opacity: 0.1 },
+              ]}
+            />
+          </Grid.Col>
+        </Grid>
+
+        {/* Product Table */}
+        <Card shadow="sm" p="lg" mt="xl">
+          <Title order={4}>Manage Products</Title>
+          <Table mt="md">
+            <thead>
+              <tr>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Stock</th>
+                <th>Price</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((product) => (
+                <tr key={product.id}>
+                  <td>{product.name}</td>
+                  <td>{product.category}</td>
+                  <td>{product.stock}</td>
+                  <td>{product.price}</td>
+                  <td>
+                    <Group>
+                      <Button size="xs" onClick={() => handleEdit(product.id)}>
+                        Edit
+                      </Button>
+                      <Button size="xs" color="red" onClick={() => handleDelete(product.id)}>
+                        Delete
+                      </Button>
+                    </Group>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+          <Button mt="md" onClick={handleAddProduct}>
+            Add Product
+          </Button>
+        </Card>
+      </Container>
+    </AppShell>
+  );
 };
 
-export function Dashboard() {
-    return (
-        <Box sx={{ flexGrow: 1, p: 3 }}>
-            <Container>
-                <Typography variant="h4" gutterBottom>
-                    Welcome Back!
-                </Typography>
-                <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-                    {/* Cards */}
-                    {["Users", "Revenue", "Sales"].map((text, index) => (
-                        <Card sx={{ width: 250 }} key={index}>
-                            <CardContent>
-                                <Typography variant="h6">{text}</Typography>
-                                <Typography variant="h4" color="primary">
-                                    {index === 0 ? "1,240" : index === 1 ? "$12,400" : "450"}
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </Box>
-                <Box sx={{ mt: 4 }}>
-                    <Typography variant="h5" gutterBottom>
-                        Revenue Overview
-                    </Typography>
-                    <Line data={chartData} />
-                </Box>
-            </Container>
-        </Box>
-    );
-}
-
 export default Dashboard;
+
