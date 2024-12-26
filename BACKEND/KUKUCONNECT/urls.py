@@ -23,6 +23,7 @@ urlpatterns = [
     path('api/profiles/', include('profiles.urls')),  # Your profiles app
     path('api/products/', include('products.urls')),  # Your products app
     path('api/payments/', include('payments.urls')),  # Your payments app
+    path('api/', include('chatbot.urls')),  # Your chatbot app
     # Swagger URLs
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
