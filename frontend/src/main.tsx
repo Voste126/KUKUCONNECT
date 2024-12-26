@@ -34,6 +34,7 @@ const customTheme: MantineThemeOverride = {
       '#9C6B27',
       '#9E6D29',
     ],
+    
     yellow: [
       '#FFD700',
       '#FFE000',
