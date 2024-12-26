@@ -5,7 +5,7 @@ import { LoginPage } from "./LoginPage";
 import SignUpPage from "./SignUpPage";
 import Home from "./HomeButton";
 import ProductList from "../pages/ProductList";
-
+import Dashboard from "./Dashboard";
 const RouterSwithcer = () => {
     return (
         <Routes>
@@ -14,6 +14,7 @@ const RouterSwithcer = () => {
             <Route path="/signup" element={<SignUpPage />} />
             <Route path="*" element={<NotFoundImage />} />
             <Route path="/digital-market" element={<ProductList />} />
+            <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
     );
 };
