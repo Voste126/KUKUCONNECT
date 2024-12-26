@@ -5,6 +5,9 @@ import { Paper } from '@mantine/core';
 import { useMantineTheme } from '@mantine/core';
 import heroImage from '../assets/hero3.jpg';
 import classes from './Demo.module.css';
+ import { useNavigate } from 'react-router-dom';
+
+                
 
 const themeColors = {
   primary: '#006400',  // Green
@@ -79,6 +82,7 @@ function Card({ image, title, category }: CardProps) {
 
 function CarouselSection() {
   const theme = useMantineTheme();
+  
   const mobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const slides = data.map((item) => (
     <Carousel.Slide key={item.title}>
@@ -103,6 +107,7 @@ function CarouselSection() {
 }
 
 export function Home() {
+  const navigate = useNavigate();
   return (
       <Box style={{ backgroundColor: 'transparent', minHeight: '100vh', padding: '2rem' }}>
         {/* Carousel Section */}
@@ -144,6 +149,8 @@ export function Home() {
                 with digital tools to connect, trade, and innovate.
               </Text>
               <Group>
+               
+
                 <Button
                   size="lg"
                   radius="xl"
@@ -151,6 +158,7 @@ export function Home() {
                     backgroundColor: themeColors.primary,
                     padding: '0.75rem 2rem',
                   }}
+                  onClick={() => navigate('/login')}
                 >
                   Get Started
                 </Button>
