@@ -5,11 +5,15 @@ from rest_framework.response import Response
 from rest_framework import status
 import openai
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
-
+# Debug print to verify the key is loaded 
+# print(f"Loaded OpenAI API key: {os.getenv('OPENAI_API_KEY')}")
 class ChatbotResponseView(APIView):
     last_request_time = 0
     min_interval = 1  # Minimum interval between requests in seconds
