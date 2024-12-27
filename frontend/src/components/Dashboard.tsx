@@ -117,7 +117,7 @@ const Dashboard = () => {
         </Grid>
 
         {/* Product Table */}
-        <Card shadow="sm" p="lg" mt="xl">
+        <Card shadow="sm" p="lg" mt="xl" style={{marginBottom:'8rem'}}>
           <Title order={4}>Manage Products</Title>
           <Table mt="md">
             <thead>

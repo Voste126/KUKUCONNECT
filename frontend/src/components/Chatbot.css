@@ -1,0 +1,72 @@
+/* Chatbot.css */
+
+
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: #fff;
+    width: 62vw;  /* Full width */
+    height: 77vh; /* Full height */
+    overflow: hidden;
+}
+
+.messages-container {
+    padding: 10px;
+    overflow-y: auto;
+    flex-grow: 1;
+    background-color: #efeae2;
+}
+
+.message {
+    padding: 10px;
+    margin: 5px 20px;  /* Added margin to separate the messages */
+    border-radius: 8px;
+    max-width: 75%;
+    word-wrap: break-word;
+}
+
+.message.user {
+    align-self: flex-end;
+    background-color: #4E342E; /* Dark brown for user messages */
+    color: #fff; /* White text for contrast */
+    margin-right: 20px; /* Align to the right margin */
+}
+
+.message.bot {
+    align-self: flex-start;
+    background-color: #2E4D2B; /* Dark green for AI messages */
+    color: #fff; /* White text for contrast */
+    margin-left: 20px; /* Align to the left margin */
+}
+
+.input-container {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-top: 1px solid #ececec;
+    background-color: #f9f9f9;
+}
+
+.input-container input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ececec;
+    border-radius: 20px;
+    outline: none;
+}
+
+.input-container button {
+    margin-left: 10px;
+    padding: 10px 20px;
+    border: none;
+    background-color: #25d366; /* WhatsApp green */
+    color: white;
+    border-radius: 20px;
+    cursor: pointer;
+    outline: none;
+}
+
+.input-container button:hover {
+    background-color: #1ebd55;
+}

@@ -6,6 +6,7 @@ import SignUpPage from "./SignUpPage";
 import Home from "./HomeButton";
 import ProductList from "../pages/ProductList";
 import Dashboard from "./Dashboard";
+import Chatbot from "./Chatbot";
 const RouterSwithcer = () => {
     return (
         <Routes>
@@ -15,6 +16,7 @@ const RouterSwithcer = () => {
             <Route path="*" element={<NotFoundImage />} />
             <Route path="/digital-market" element={<ProductList />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/ai-iot" element={<Chatbot />} />
         </Routes>
     );
 };
