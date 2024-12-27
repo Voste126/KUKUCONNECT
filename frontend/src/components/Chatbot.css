@@ -60,7 +60,7 @@
     margin-left: 10px;
     padding: 10px 20px;
     border: none;
-    background-color: #25d366; /* WhatsApp green */
+    background-color: #062f15; /* WhatsApp green */
     color: white;
     border-radius: 20px;
     cursor: pointer;
@@ -68,5 +68,5 @@
 }
 
 .input-container button:hover {
-    background-color: #1ebd55;
+    background-color: #063c19;
 }
