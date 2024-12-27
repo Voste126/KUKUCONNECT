@@ -61,7 +61,7 @@ function App() {
 
         <AppShell.Footer>
           <Flex justify="center" align="center" style={{ padding: '10px 20px' }}>
-            <p>&copy; 2021 KUKUCONNECT</p>
+            <p>&copy; 2024 KUKUCONNECT</p>
           </Flex>
         </AppShell.Footer>
       </AppShell>

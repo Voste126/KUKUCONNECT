@@ -30,7 +30,7 @@ const linksMockdata = [
   { label: 'Home', path: '/' },
   { label: 'Dashboard', path: '/dashboard' },
   { label: 'Digital Market', path: '/digital-market' },
-  { label: 'AI/IoT', path: '/ai-iot' },
+  { label: 'AI support', path: '/ai-iot' },
   { label: 'Account', path: '/account' },
   { label: 'SignUp', path: '/signup' },
   { label: 'Login', path: '/login' },
