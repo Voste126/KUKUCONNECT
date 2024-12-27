@@ -8,6 +8,7 @@ import {
   IconSettings,
   IconUser,
   IconLogout,
+  IconCheck,
 } from '@tabler/icons-react';
 import { Title, Tooltip, UnstyledButton } from '@mantine/core';
 // import { MantineLogo } from '@mantinex/mantine-logo';
@@ -23,6 +24,7 @@ const mainLinksMockdata = [
   { icon: IconFingerprint, label: 'SignUp', path: '/signup' },
   { icon: IconFingerprint, label: 'SignUp', path: '/login' },
   { icon: IconSettings, label: 'Settings', path: '/settings' },
+  { icon: IconCheck, label: 'Checkout', path: '/checkout' },
   { icon: IconLogout, label: 'Logout', path: '/logout' },
 ];
 
@@ -35,6 +37,7 @@ const linksMockdata = [
   { label: 'SignUp', path: '/signup' },
   { label: 'Login', path: '/login' },
   { label: 'Settings', path: '/settings' },
+  { label: 'Checkout', path: '/checkout' },
   { label: 'Logout', path: '/logout' },
 ];
 

@@ -21,41 +21,43 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
     return (
-        <Card shadow="sm" padding="lg" radius="md" withBorder style={{ height: '400px' }}>
-            <Card.Section>
-                <Image 
-                    src={ `https://via.placeholder.com/150?text=${product.title}`} 
-                    alt={product.title} 
-                    height={150} 
-                    width="100%"
-                />
-            </Card.Section>
+        <Card shadow="sm" padding="lg" radius="md" withBorder style={{ height: '400px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+                <Card.Section>
+                    <Image 
+                        src={ `https://via.placeholder.com/150?text=${product.title}`} 
+                        alt={product.title} 
+                        height={150} 
+                        width="100%"
+                    />
+                </Card.Section>
 
-            <Group mt="md">
-                <Text>{product.title}</Text>
-                <Text>${product.price}</Text>
-            </Group>
+                <Group mt="md">
+                    <Text>{product.title}</Text>
+                    <Text>${product.price}</Text>
+                </Group>
 
-            <Text size="sm" color="dimmed" mt="xs">
-                {product.description}
-            </Text>
-
-            <Text size="sm" mt="xs">
-                Stock: {product.stock}
-            </Text>
-
-            <Text size="sm" mt="xs">
-                Farmer: {product.farmer_name}
-            </Text>
-
-            <Group mt="xs" >
-                <Text size="xs" color="dimmed">
-                    Created at: {new Date(product.created_at).toLocaleDateString()}
+                <Text size="sm" color="dimmed" mt="xs">
+                    {product.description}
                 </Text>
-                <Text size="xs" color="dimmed">
-                    Updated at: {new Date(product.updated_at).toLocaleDateString()}
+
+                <Text size="sm" mt="xs">
+                    Stock: {product.stock}
                 </Text>
-            </Group>
+
+                <Text size="sm" mt="xs">
+                    Farmer: {product.farmer_name}
+                </Text>
+
+                <Group mt="xs">
+                    <Text size="xs" color="dimmed">
+                        Created at: {new Date(product.created_at).toLocaleDateString()}
+                    </Text>
+                    <Text size="xs" color="dimmed">
+                        Updated at: {new Date(product.updated_at).toLocaleDateString()}
+                    </Text>
+                </Group>
+            </div>
 
             <Button
                 fullWidth

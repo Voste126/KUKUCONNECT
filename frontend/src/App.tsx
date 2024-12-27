@@ -1,11 +1,12 @@
 import './App.css';
+import React from 'react';
 // Core styles are required for all packages
 import { AppShell, Title, Burger, Flex, Button, useMantineColorScheme, useComputedColorScheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { FaMoon, FaSun } from 'react-icons/fa';
 import chickenLogo from './assets/KCNlogo.png';
 import { DoubleNavbar } from './components/Navbar';
-import RouterSwithcer from './components/RouterSwitcher';
+const RouterSwitcher = React.lazy(() => import('./components/RouterSwitcher'));
 function App() {
   
   const [opened, { toggle }] = useDisclosure();
@@ -56,7 +57,9 @@ function App() {
         </AppShell.Navbar>
 
         <AppShell.Main>
-          <RouterSwithcer />
+          <React.Suspense fallback="Loading...">
+            <RouterSwitcher />
+          </React.Suspense>
         </AppShell.Main>
 
         <AppShell.Footer>
