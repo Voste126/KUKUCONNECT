@@ -8,6 +8,7 @@ import ProductList from "../pages/ProductList";
 import Dashboard from "./Dashboard";
 import Chatbot from "./Chatbot";
 import ProfileForm from "./ProfileForm";
+import LogoutPage from "./Logout";
 const RouterSwithcer = () => {
     return (
         <Routes>
@@ -18,6 +19,7 @@ const RouterSwithcer = () => {
             <Route path="/digital-market" element={<ProductList />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/ai-iot" element={<Chatbot />} />
+            <Route path="/logout" element={<LogoutPage />} />
             <Route path="/account" element={<ProfileForm userType="farmer" profileData={{ farmName: '', location: '', phoneNumber: '' }} onUpdate={() => {}} />} />
         </Routes>
     );
