@@ -102,7 +102,7 @@ export const LoginPage: React.FC = () => {
 
         <Stepper.Completed>
           <Notification title="All steps completed!" color="teal" mt="md">
-            Review your information and submit to complete login.
+            Welcome to Kukuconect!! 🎉 click submit to complete Login.
           </Notification>
         </Stepper.Completed>
       </Stepper>
