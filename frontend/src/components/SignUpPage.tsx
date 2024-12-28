@@ -13,7 +13,8 @@ import {
 import { useForm } from '@mantine/form';
 import { showNotification } from '@mantine/notifications';
 import { useNavigate } from 'react-router-dom';
-import { IconCheck } from '@tabler/icons-react';
+import { IconCheck, IconX } from '@tabler/icons-react';
+import axios from 'axios';
 
 // Signup Page
 export const SignupPage: React.FC = () => {
@@ -24,7 +25,6 @@ export const SignupPage: React.FC = () => {
     initialValues: {
       username: '',
       password: '',
-      name: '',
       email: '',
       userType: '',
     },
@@ -32,14 +32,13 @@ export const SignupPage: React.FC = () => {
     validate: (values) => {
       if (active === 0) {
         return {
-          username: values.username.trim().length < 6 ? 'Username must include at least 6 characters' : null,
+          username: values.username.trim().length < 1 ? 'Username is required and must include valid characters' : null,
           password: values.password.length < 6 ? 'Password must include at least 6 characters' : null,
         };
       }
 
       if (active === 1) {
         return {
-          name: values.name.trim().length < 2 ? 'Name must include at least 2 characters' : null,
           email: !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email) ? 'Invalid email' : null,
           userType: values.userType ? null : 'Please select user type',
         };
@@ -57,22 +56,38 @@ export const SignupPage: React.FC = () => {
 
   const prevStep = () => setActive((current) => (current > 0 ? current - 1 : current));
 
-  const handleSignup = () => {
-    // Simulate API call
-    setTimeout(() => {
+  const handleSignup = async () => {
+    const { username, password, email, userType } = form.values;
+
+    try {
+      await axios.post('http://localhost:8000/api/users/register/', {
+        username,
+        password,
+        email,
+        user_type: userType,
+      });
+
       showNotification({
         title: 'Signup Successful',
         message: 'Redirecting to login page...',
         icon: <IconCheck size={16} />,
         color: 'teal',
       });
+
       navigate('/login');
-    }, 1000);
+    } catch (error) {
+      showNotification({
+        title: 'Signup Failed',
+        message: axios.isAxiosError(error) && error.response?.data?.detail ? error.response.data.detail : 'An error occurred during signup.',
+        icon: <IconX size={16} />,
+        color: 'red',
+      });
+    }
   };
 
   return (
     <Container size="sm">
-      <Title  mt="md" mb="lg">Sign Up to KukuConnect</Title>
+      <Title mt="md" mb="lg">Sign Up</Title>
       <Stepper active={active} onStepClick={setActive} >
         <Stepper.Step label="Account Details" description="Set your account credentials">
           <TextInput
@@ -89,11 +104,6 @@ export const SignupPage: React.FC = () => {
         </Stepper.Step>
 
         <Stepper.Step label="Personal Information" description="Enter your details">
-          <TextInput
-            label="Name"
-            placeholder="Enter your name"
-            {...form.getInputProps('name')}
-          />
           <TextInput
             mt="md"
             label="Email"
@@ -119,7 +129,7 @@ export const SignupPage: React.FC = () => {
         </Stepper.Completed>
       </Stepper>
 
-      <Group  mt="xl">
+      <Group mt="xl">
         {active !== 0 && (
           <Button variant="default" onClick={prevStep}>Back</Button>
         )}
@@ -131,5 +141,6 @@ export const SignupPage: React.FC = () => {
       </Group>
     </Container>
   );
-};;
+};
+
 export default SignupPage;

@@ -5,7 +5,7 @@ import LoadingSpinner from "./LoadingSpinner"; // Add a spinner or loading indic
 
 // Lazy load components
 const Home = React.lazy(() => import("./HomeButton"));
-const LoginPage = React.lazy(() => import("./LoginPage"));
+const LoginPage = React.lazy(() => import("./LoginForm"));
 const SignUpPage = React.lazy(() => import("./SignUpPage"));
 const ProductList = React.lazy(() => import("../pages/ProductList"));
 const Dashboard = React.lazy(() => import("./Dashboard"));
