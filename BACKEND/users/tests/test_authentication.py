@@ -90,3 +90,32 @@ class UserAuthenticationTests(APITestCase):
 
         response = self.client.get(protected_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    #new test cases 
+    def test_get_user_details_success(self):
+        """Test retrieving user details for the logged-in user."""
+        # Obtain JWT tokens
+        data = {
+            "username": self.user_data["username"],
+            "password": self.user_data["password"],
+        }
+        login_response = self.client.post(self.login_url, data)
+        access_token = login_response.data["access"]
+
+        # Use the token to access the `/api/users/me/` endpoint
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
+        response = self.client.get(reverse('user-detail'))
+
+        # Assert the response status and data
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["username"], self.user_data["username"])
+        self.assertEqual(response.data["id"], self.user.id)
+
+    def test_get_user_details_unauthenticated(self):
+        """Test retrieving user details without authentication."""
+        response = self.client.get(reverse('user-detail'))
+
+        # Assert the response status for unauthenticated access
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertIn("detail", response.data)
+        self.assertEqual(response.data["detail"], "Authentication credentials were not provided.")

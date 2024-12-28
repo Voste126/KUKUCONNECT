@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 import logging
-from rest_framework import generics, permissions, status,viewsets
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.response import Response
 from .models import FarmerProfile, BuyerProfile
 from .serializers import FarmerProfileSerializer, BuyerProfileSerializer
@@ -21,15 +21,15 @@ class FarmerProfileCreateView(generics.CreateAPIView):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-        
 class FarmerProfileDetailView(generics.RetrieveUpdateAPIView):
     queryset = FarmerProfile.objects.all()
     serializer_class = FarmerProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
+    lookup_field = 'user_id'
 
     @swagger_auto_schema(operation_description="Retrieve a Farmer Profile")
     def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
+        return self.queryset.filter(user_id=self.kwargs['user_id'])
 
 # Buyer Profile Views
 class BuyerProfileCreateView(generics.CreateAPIView):
@@ -47,7 +47,8 @@ class BuyerProfileDetailView(generics.RetrieveUpdateAPIView):
     queryset = BuyerProfile.objects.all()
     serializer_class = BuyerProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
+    lookup_field = 'user_id'
 
     @swagger_auto_schema(operation_description="Retrieve a Buyer Profile")
     def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
+        return self.queryset.filter(user_id=self.kwargs['user_id'])
