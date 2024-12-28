@@ -10,7 +10,8 @@ const SignUpPage = React.lazy(() => import("./SignUpPage"));
 const ProductList = React.lazy(() => import("../pages/ProductList"));
 const Dashboard = React.lazy(() => import("./Dashboard"));
 const Chatbot = React.lazy(() => import("./Chatbot"));
-const ProfileForm = React.lazy(() => import("./ProfileForm"));
+// const ProfileForm = React.lazy(() => import("./ProfileForm"));
+const AccountRoute = React.lazy(() => import("./AccountRoute"));
 const LogoutPage = React.lazy(() => import("./Logout"));
 const Checkout = React.lazy(() => import("../pages/Checkout"));
 
@@ -26,16 +27,7 @@ const RouterSwitcher = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/ai-iot" element={<Chatbot />} />
         <Route path="/logout" element={<LogoutPage />} />
-        <Route
-          path="/account"
-          element={
-            <ProfileForm
-              userType="farmer"
-              profileData={{ farmName: "", location: "", phoneNumber: "" }}
-              onUpdate={() => {}}
-            />
-          }
-        />
+        <Route path="/account/*" element={<AccountRoute />} />
         <Route path="/checkout" element={<Checkout />} />
       </Routes>
     </Suspense>

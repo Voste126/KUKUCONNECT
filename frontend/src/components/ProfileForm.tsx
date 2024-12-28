@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Button,
   Group,
@@ -8,11 +8,12 @@ import {
   TextInput,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { showNotification} from '@mantine/notifications';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 interface ProfileProps {
   userType: 'farmer' | 'buyer';
-  profileData: FarmerProfile | BuyerProfile;
-  onUpdate: (data: Partial<FarmerProfile | BuyerProfile>) => void;
 }
 
 interface FarmerProfile {
@@ -28,14 +29,30 @@ interface BuyerProfile {
   preferredProducts?: string;
 }
 
-const ProfileForm: React.FC<ProfileProps> = ({ userType, profileData, onUpdate }) => {
+type ProfileData = FarmerProfile | BuyerProfile;
+
+const ProfileForm: React.FC<ProfileProps> = ({ userType }) => {
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const navigate = useNavigate();
+  const token = localStorage.getItem('accessToken');
+  let id = null;
+  if (token) {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    id = payload.user_id; // Assuming the token payload contains the user ID
+  }
+  const apiUrl = `http://localhost:8000/api/profiles/${userType === 'farmer' ? 'farmers' : 'buyers'}/${id}/`;
+
   const form = useForm({
-    initialValues: profileData,
+    initialValues: {
+      phoneNumber: '',
+      ...(userType === 'farmer' && { farmName: '', location: '', farmSize: '' }),
+      ...(userType === 'buyer' && { businessName: '', preferredProducts: '' }),
+    },
     validate: {
       phoneNumber: (val: string) => (/^\+?\d{10,15}$/.test(val) ? null : 'Invalid phone number'),
       ...(userType === 'farmer' && {
-        farmName: (val: string) => (val.length > 0 ? null : 'Farm Name is required'),
-        location: (val: string) => (val.length > 0 ? null : 'Location is required'),
+        farmName: (val?: string) => (val && val.length > 0 ? null : 'Farm Name is required'),
+        location: (val?: string) => (val && val.length > 0 ? null : 'Location is required'),
       }),
       ...(userType === 'buyer' && {
         businessName: (val?: string) => (val && val.length > 0 ? null : 'Business Name is required'),
@@ -43,77 +60,125 @@ const ProfileForm: React.FC<ProfileProps> = ({ userType, profileData, onUpdate }
     },
   });
 
-  const handleSubmit = (values: typeof form.values) => {
-    onUpdate(values);
+  useEffect(() => {
+    if (!token) {
+      showNotification({
+        title: 'Authentication Required',
+        message: 'Please log in to view your profile.',
+        color: 'red',
+      });
+      navigate('/login');
+      return;
+    }
+
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get(apiUrl, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setProfileData(response.data);
+        form.setValues(response.data);
+      } catch {
+        showNotification({
+          title: 'Error Fetching Profile',
+          message: 'Could not fetch profile details. Please try again later.',
+          color: 'red',
+        });
+      }
+    };
+
+    fetchProfile();
+  }, [apiUrl, token, navigate, form]);
+
+  const handleUpdate = async (values: typeof form.values) => {
+    console.log('Updating profile with values:', values); // Add logging
+    try {
+      await axios.put(apiUrl, values, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      console.log('Profile updated successfully'); // Add logging
+      showNotification({
+        title: 'Profile Updated',
+        message: 'Your profile has been successfully updated.',
+        color: 'teal',
+      });
+      navigate('/digital-market');
+    } catch (error) {
+      console.error('Error updating profile:', error); // Add logging
+      showNotification({
+        title: 'Update Failed',
+        message: 'Could not update your profile. Please try again later.',
+        color: 'red',
+      });
+    }
   };
 
   return (
     <Paper radius="md" p="xl" withBorder>
-      <Text size="lg"  mb="lg">
+      <Text size="lg" mb="lg">
         {userType === 'farmer' ? 'Farmer Profile' : 'Buyer Profile'}
       </Text>
 
-      <form onSubmit={form.onSubmit(handleSubmit)}>
-        <Stack>
-          {userType === 'farmer' && (
-            <>
-              <TextInput
-                label="Farm Name"
-                placeholder="Farm Name"
-                value={userType === 'farmer' ? (form.values as FarmerProfile).farmName : ''}
-                onChange={(event) => form.setFieldValue('farmName', event.currentTarget.value)}
-                error={form.errors.farmName}
-              />
-              <TextInput
-                label="Location"
-                placeholder="Location"
-                value={userType === 'farmer' ? (form.values as FarmerProfile).location : ''}
-                onChange={(event) => form.setFieldValue('location', event.currentTarget.value)}
-                error={form.errors.location}
-              />
-              <TextInput
-                label="Farm Size (in acres/hectares)"
-                placeholder="Farm Size"
-                value={userType === 'farmer' ? (form.values as FarmerProfile).farmSize?.toString() || '' : ''}
-                onChange={(event) => userType === 'farmer' && form.setFieldValue('farmSize', parseFloat(event.currentTarget.value))}
-              />
-            </>
-          )}
+      {profileData ? (
+        <form onSubmit={form.onSubmit(handleUpdate)}>
+          <Stack>
+            {userType === 'farmer' && (
+              <>
+                <TextInput
+                  label="Farm Name"
+                  placeholder="Farm Name"
+                  {...form.getInputProps('farmName')}
+                />
+                <TextInput
+                  label="Location"
+                  placeholder="Location"
+                  {...form.getInputProps('location')}
+                />
+                <TextInput
+                  label="Farm Size (in acres/hectares)"
+                  placeholder="Farm Size"
+                  {...form.getInputProps('farmSize')}
+                />
+              </>
+            )}
 
-          {userType === 'buyer' && (
-            <>
-              <TextInput
-                label="Business Name"
-                placeholder="Business Name"
-                value={(form.values as BuyerProfile).businessName || ''}
-                onChange={(event) => form.setFieldValue('businessName', event.currentTarget.value)}
-                error={form.errors.businessName}
-              />
-              <TextInput
-                label="Preferred Products"
-                placeholder="Preferred Products"
-                value={(form.values as BuyerProfile).preferredProducts || ''}
-                onChange={(event) => form.setFieldValue('preferredProducts', event.currentTarget.value)}
-              />
-            </>
-          )}
+            {userType === 'buyer' && (
+              <>
+                <TextInput
+                  label="Business Name"
+                  placeholder="Business Name"
+                  {...form.getInputProps('businessName')}
+                />
+                <TextInput
+                  label="Preferred Products"
+                  placeholder="Preferred Products"
+                  {...form.getInputProps('preferredProducts')}
+                />
+              </>
+            )}
 
-          <TextInput
-            label="Phone Number"
-            placeholder="Phone Number"
-            value={form.values.phoneNumber}
-            onChange={(event) => form.setFieldValue('phoneNumber', event.currentTarget.value)}
-            error={form.errors.phoneNumber}
-          />
-        </Stack>
+            <TextInput
+              label="Phone Number"
+              placeholder="Phone Number"
+              {...form.getInputProps('phoneNumber')}
+            />
+          </Stack>
 
-        <Group  mt="lg">
-          <Button type="submit">Update Profile</Button>
-          <Button style={{color: 'black', backgroundColor:'red'}}> DELETE ACCOUNT</Button>
-        </Group>
-      </form>
+          <Group mt="lg">
+            <Button type="submit">Update Profile</Button>
+            <Button style={{ color: 'black', backgroundColor: 'red' }}>DELETE ACCOUNT</Button>
+          </Group>
+        </form>
+      ) : (
+        <Text>Loading profile...</Text>
+      )}
     </Paper>
   );
 };
 
 export default ProfileForm;
+
+
