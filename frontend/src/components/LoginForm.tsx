@@ -8,9 +8,10 @@ import {
   Container,
   Title,
   Notification,
+  rem,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { showNotification } from '@mantine/notifications';
+// import { showNotification } from '@mantine/notifications';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { IconCheck, IconX } from '@tabler/icons-react';
@@ -19,6 +20,9 @@ import { IconCheck, IconX } from '@tabler/icons-react';
 export const LoginPage: React.FC = () => {
   const [active, setActive] = useState(0);
   const navigate = useNavigate();
+  const [notification, setNotification] = useState<{ title: string; message: string; color: string; icon: React.ReactNode } | null>(null);
+  const checkIcon = <IconCheck style={{ width: rem(20), height: rem(20) }} />;
+  const xicon = <IconX style={{ width: rem(20), height: rem(20) }} />;
 
   const form = useForm({
     initialValues: {
@@ -64,19 +68,19 @@ export const LoginPage: React.FC = () => {
       localStorage.setItem('accessToken', response.data.access);
       localStorage.setItem('refreshToken', response.data.refresh);
 
-      showNotification({
+      
+      setNotification({
         title: 'Login Successful',
-        message: 'Redirecting to the digital market...',
-        icon: <IconCheck size={16} />,
+        message: 'Welcome back! Redirecting to the digital market...',
+        icon: checkIcon,
         color: 'teal',
       });
-
       navigate('/digital-market');
     } catch {
-      showNotification({
+      setNotification({
         title: 'Login Failed',
         message: 'Invalid credentials, please try again.',
-        icon: <IconX size={16} />,
+        icon: xicon,
         color: 'red',
       });
     }
@@ -101,9 +105,11 @@ export const LoginPage: React.FC = () => {
         </Stepper.Step>
 
         <Stepper.Completed>
-          <Notification title="All steps completed!" color="teal" mt="md">
-            Welcome to Kukuconect!! 🎉 click submit to complete Login.
-          </Notification>
+          {notification && (
+        <Notification icon={notification.icon} color={notification.color} title={notification.title} mt="md">
+          {notification.message}
+        </Notification>
+            )}
         </Stepper.Completed>
       </Stepper>
 

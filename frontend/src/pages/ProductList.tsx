@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, TextInput, Select, Container, Grid, Table, Card, NumberInput, Group } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
-
+import axios from 'axios';
 interface Product {
   id: number;
   title: string;
@@ -21,16 +21,31 @@ const ProductList: React.FC = () => {
   const [filter, setFilter] = useState({ price: '', category: '', title: '' });
   const [cart, setCart] = useState<Product[]>([]);
   const navigate = useNavigate();
+  const token = localStorage.getItem('accessToken');
 
   // Fetch products on initial render
   useEffect(() => {
-    fetch('http://localhost:8000/api/products/')
-      .then((response) => response.json())
-      .then((data) => {
-        setProducts(data);
-        setFilteredProducts(data);
-      });
-  }, []);
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/api/products/', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setProducts(response.data);
+        setFilteredProducts(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    // fetch('http://localhost:8000/api/products/')
+    //   .then((response) => response.json())
+    //   .then((data) => {
+    //     setProducts(data);
+    //     setFilteredProducts(data);
+    //   });
+    fetchProducts();
+  }, [token]);
 
   // Filter products based on criteria
   const handleFilter = () => {
@@ -74,11 +89,11 @@ const ProductList: React.FC = () => {
   };
 
   return (
-    <Container>
+    <Container  style={{marginTop: '0.25rem'}}>
       <h2>Product List</h2>
 
       {/* Filters Section */}
-      <Card withBorder shadow="sm" padding="lg" mb="lg">
+      <Card withBorder shadow="sm" padding="lg" mb="lg" style={{marginTop: '0.5rem'}}>
         <Grid>
           <Grid.Col span={4}>
             <TextInput

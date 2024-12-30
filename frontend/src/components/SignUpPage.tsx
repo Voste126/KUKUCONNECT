@@ -9,9 +9,9 @@ import {
   Container,
   Title,
   Notification,
+  rem,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { showNotification } from '@mantine/notifications';
 import { useNavigate } from 'react-router-dom';
 import { IconCheck, IconX } from '@tabler/icons-react';
 import axios from 'axios';
@@ -20,6 +20,9 @@ import axios from 'axios';
 export const SignupPage: React.FC = () => {
   const [active, setActive] = useState(0);
   const navigate = useNavigate();
+  const [notification, setNotification] = useState<{ title: string; message: string; color: string; icon: React.ReactNode } | null>(null);
+  const checkIcon = <IconCheck style={{ width: rem(20), height: rem(20) }} />;
+  const xicon = <IconX style={{ width: rem(20), height: rem(20) }} />;
 
   const form = useForm({
     initialValues: {
@@ -124,19 +127,19 @@ export const SignupPage: React.FC = () => {
         });
       }
 
-      showNotification({
+      setNotification({
         title: 'Signup Successful',
-        message: 'Redirecting to login page...',
-        icon: <IconCheck size={16} />,
+        message: 'Your account has been created successfully. Redirecting to login...',
+        icon: checkIcon,
         color: 'teal',
       });
 
       navigate('/login');
     } catch (error) {
-      showNotification({
+      setNotification({
         title: 'Signup Failed',
-        message: axios.isAxiosError(error) && error.response?.data?.detail ? error.response.data.detail : 'An error occurred during signup.',
-        icon: <IconX size={16} />,
+        message: 'An error occurred while creating your account. Please try again. If the problem persists, contact supportwith the following complaint:'+ error,
+        icon: xicon,
         color: 'red',
       });
     }
@@ -233,9 +236,11 @@ export const SignupPage: React.FC = () => {
         </Stepper.Step>
 
         <Stepper.Completed>
-          <Notification title="All steps completed!" color="teal" mt="md">
-            Review your information and submit to complete signup.
-          </Notification>
+          {notification && (
+            <Notification icon={notification.icon} color={notification.color} title={notification.title} mt="md">
+              {notification.message}
+            </Notification>
+          )}
         </Stepper.Completed>
       </Stepper>
 

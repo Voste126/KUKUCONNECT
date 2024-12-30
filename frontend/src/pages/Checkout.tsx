@@ -3,6 +3,7 @@ import { Container, Grid, Card, TextInput, Button, Table, RadioGroup, Radio } fr
 import { useLocation } from 'react-router-dom';
 import {  IconCheck } from '@tabler/icons-react';
 import { Notification, rem } from '@mantine/core';
+import { useNavigate } from 'react-router-dom';
 
 interface Product {
   id: number;
@@ -12,6 +13,7 @@ interface Product {
 }
 
 const Checkout: React.FC = () => {
+  const navigate = useNavigate();
   const [notification, setNotification] = useState<{ title: string; message: string; color: string; icon: React.ReactNode } | null>(null);
   const checkIcon = <IconCheck style={{ width: rem(20), height: rem(20) }} />;
   const location = useLocation();
@@ -25,6 +27,7 @@ const Checkout: React.FC = () => {
       color: 'green',
       icon: checkIcon,
     });
+    navigate('/digital-market');
   };
 
   return (
