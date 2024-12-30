@@ -1,121 +1,151 @@
-from rest_framework.test import APITestCase, APIClient
+import pytest
 from rest_framework import status
-#from django.contrib.auth.models import User
-from django.contrib.auth import get_user_model
 from django.urls import reverse
+from django.contrib.auth import get_user_model
+from rest_framework.test import APIClient
 
 User = get_user_model()
 
-class UserAuthenticationTests(APITestCase):
-    def setUp(self):
-        """Set up initial data for tests."""
-        self.client = APIClient()
-        self.register_url = reverse('user-register')  # URL name for registration
-        self.login_url = reverse('token_obtain_pair')  # JWT token login endpoint
+@pytest.fixture
+def api_client():
+    return APIClient()
 
-        # Create a test user for login tests
-        self.user_data = {
-            "username": "farmer1",
-            "password": "TestPass123",
-            "email": "farmer1@example.com",
-        }
-        self.user = User.objects.create_user(**self.user_data)
+@pytest.fixture
+def create_user(db):
+    def make_user(**kwargs):
+        if 'email' not in kwargs:
+            kwargs['email'] = f"{kwargs['username']}@example.com"
+        return User.objects.create_user(**kwargs)
+    return make_user
 
-    def test_user_registration_success(self):
-        """Test successful user registration."""
-        data = {
-            "username": "buyer1",
-            "password": "TestPass123",
-            "email": "buyer1@example.com",
-            "user_type": "buyer",
-        }
-        response = self.client.post(self.register_url, data)
+@pytest.fixture
+def get_token(api_client):
+    def obtain_token(username, password):
+        response = api_client.post(reverse('token_obtain_pair'), {
+            'username': username,
+            'password': password
+        })
+        return response.data
+    return obtain_token
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertIn("username", response.data)
-        self.assertEqual(response.data["username"], "buyer1")
+@pytest.mark.django_db
+def test_user_registration_success(api_client):
+    """Test successful user registration."""
+    register_url = reverse('user-register')
+    data = {
+        "username": "buyer1",
+        "password": "TestPass123",
+        "email": "buyer1@example.com",
+        "user_type": "buyer",
+    }
+    response = api_client.post(register_url, data)
 
-    def test_user_registration_failure(self):
-        """Test registration with invalid data (e.g., missing fields)."""
-        data = {"username": "", "password": ""}
-        response = self.client.post(self.register_url, data)
+    assert response.status_code == status.HTTP_201_CREATED
+    assert "username" in response.data
+    assert response.data["username"] == "buyer1"
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("username", response.data)
-        self.assertIn("password", response.data)
+@pytest.mark.django_db
+def test_user_registration_failure(api_client):
+    """Test registration with invalid data (e.g., missing fields)."""
+    register_url = reverse('user-register')
+    data = {"username": "", "password": ""}
+    response = api_client.post(register_url, data)
 
-    def test_user_login_success(self):
-        """Test successful user login and JWT token generation."""
-        data = {
-            "username": self.user_data["username"],
-            "password": self.user_data["password"],
-        }
-        response = self.client.post(self.login_url, data)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "username" in response.data
+    assert "password" in response.data
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("access", response.data)  # Check for JWT access token
-        self.assertIn("refresh", response.data)  # Check for JWT refresh token
+@pytest.mark.django_db
+def test_user_login_success(api_client, create_user):
+    """Test successful user login and JWT token generation."""
+    user = create_user(username='farmer1', password='TestPass123', email='farmer1@example.com')
+    login_url = reverse('token_obtain_pair')
+    data = {
+        "username": "farmer1",
+        "password": "TestPass123",
+    }
+    response = api_client.post(login_url, data)
 
-    def test_user_login_failure(self):
-        """Test login failure with invalid credentials."""
-        data = {
-            "username": self.user_data["username"],
-            "password": "WrongPass123",
-        }
-        response = self.client.post(self.login_url, data)
+    assert response.status_code == status.HTTP_200_OK
+    assert "access" in response.data  # Check for JWT access token
+    assert "refresh" in response.data  # Check for JWT refresh token
 
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        self.assertIn("detail", response.data)  # Check for error message
+@pytest.mark.django_db
+def test_user_login_failure(api_client, create_user):
+    """Test login failure with invalid credentials."""
+    user = create_user(username='farmer1', password='TestPass123', email='farmer1@example.com')
+    login_url = reverse('token_obtain_pair')
+    data = {
+        "username": "farmer1",
+        "password": "WrongPass123",
+    }
+    response = api_client.post(login_url, data)
 
-    def test_access_protected_route(self):
-        """Test accessing a protected route with JWT token."""
-        # Obtain JWT tokens
-        data = {
-            "username": self.user_data["username"],
-            "password": self.user_data["password"],
-        }
-        login_response = self.client.post(self.login_url, data)
-        access_token = login_response.data["access"]
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert "detail" in response.data  # Check for error message
 
-        # Use the token to access a protected route
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
-        protected_url = reverse('protected-view')  # Replace with actual protected endpoint
+@pytest.mark.django_db
+def test_access_protected_route(api_client, create_user, get_token):
+    """Test accessing a protected route with JWT token."""
+    user = create_user(username='farmer1', password='TestPass123', email='farmer1@example.com')
+    tokens = get_token('farmer1', 'TestPass123')
+    access_token = tokens["access"]
 
-        response = self.client.get(protected_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+    # Use the token to access a protected route
+    api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
+    protected_url = reverse('protected-view')  # Replace with actual protected endpoint
 
-    def test_protected_route_without_token(self):
-        """Test accessing protected route without JWT token."""
-        protected_url = reverse('protected-view')  # Replace with actual protected endpoint
+    response = api_client.get(protected_url)
+    assert response.status_code == status.HTTP_200_OK
 
-        response = self.client.get(protected_url)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+@pytest.mark.django_db
+def test_protected_route_without_token(api_client):
+    """Test accessing protected route without JWT token."""
+    protected_url = reverse('protected-view')  # Replace with actual protected endpoint
 
-    #new test cases 
-    def test_get_user_details_success(self):
-        """Test retrieving user details for the logged-in user."""
-        # Obtain JWT tokens
-        data = {
-            "username": self.user_data["username"],
-            "password": self.user_data["password"],
-        }
-        login_response = self.client.post(self.login_url, data)
-        access_token = login_response.data["access"]
+    response = api_client.get(protected_url)
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-        # Use the token to access the `/api/users/me/` endpoint
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
-        response = self.client.get(reverse('user-detail'))
+@pytest.mark.django_db
+def test_get_user_details_success(api_client, create_user, get_token):
+    """Test retrieving user details for the logged-in user."""
+    user = create_user(username='farmer1', password='TestPass123', email='farmer1@example.com')
+    tokens = get_token('farmer1', 'TestPass123')
+    access_token = tokens["access"]
 
-        # Assert the response status and data
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["username"], self.user_data["username"])
-        self.assertEqual(response.data["id"], self.user.id)
+    # Use the token to access the `/api/users/me/` endpoint
+    api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
+    response = api_client.get(reverse('user-detail'))
 
-    def test_get_user_details_unauthenticated(self):
-        """Test retrieving user details without authentication."""
-        response = self.client.get(reverse('user-detail'))
+    # Assert the response status and data
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["username"] == "farmer1"
+    assert response.data["id"] == user.id
 
-        # Assert the response status for unauthenticated access
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        self.assertIn("detail", response.data)
-        self.assertEqual(response.data["detail"], "Authentication credentials were not provided.")
+@pytest.mark.django_db
+def test_get_user_details_unauthenticated(api_client):
+    """Test retrieving user details without authentication."""
+    response = api_client.get(reverse('user-detail'))
+
+    # Assert the response status for unauthenticated access
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert "detail" in response.data
+    assert response.data["detail"] == "Authentication credentials were not provided."
+
+
+@pytest.mark.django_db
+def test_user_logout(api_client, create_user, get_token):
+    user = create_user(username='farmer1', password='TestPass123', email='farmer1@example.com')
+    tokens = get_token('farmer1', 'TestPass123')
+    refresh_token = tokens["refresh"]
+    access_token = tokens["access"]
+    
+    # Authenticate the client
+    api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {access_token}')
+
+    # Use the refresh token to log out
+    logout_url = reverse('logout')
+    response = api_client.post(logout_url, {"refresh_token": refresh_token})
+
+    # Assert the response status
+    assert response.status_code == status.HTTP_205_RESET_CONTENT

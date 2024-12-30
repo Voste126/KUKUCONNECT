@@ -2,10 +2,12 @@ from django.shortcuts import render
 import logging
 from rest_framework import generics, permissions, status
 from .serializers import CustomUserSerializer, CustomTokenObtainPairSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenBlacklistView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
+
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +35,6 @@ class ProtectedView(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
-    
-
 
 class UserDetailView(APIView):
     """
@@ -50,3 +50,21 @@ class UserDetailView(APIView):
             "userType": user.user_type  # Assuming user_type is a field in your CustomUser model
         }
         return Response(data)
+
+class LogoutView(APIView):
+    """
+    API view to log out the user and revoke the JWT token.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data.get("refresh_token")
+            if refresh_token is None:
+                return Response({"error": "Refresh token is required"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
