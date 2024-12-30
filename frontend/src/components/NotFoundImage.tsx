@@ -13,8 +13,9 @@ export function NotFoundImage() {
                 <div>
                     <Title className={classes.title}>Something is not right...</Title>
                     <Text c="dimmed" size="lg">
-                        Page you are trying to open does not exist. You may have mistyped the address, or the
-                        page has been moved to another URL. If you think this is an error contact support.
+                    We are working on bring this page back to life. Please check back later.
+                    We are working tirelessly with our engineers to bring this concept to you as fast as possible. Thank you for your patience and  Thank you for
+                    Choosing Kukuconnect as your preferred platform.
                     </Text>
                     <Button variant="outline" size="md" mt="xl" className={classes.control} onClick={
                         () => {

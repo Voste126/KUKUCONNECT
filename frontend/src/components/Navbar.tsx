@@ -36,7 +36,7 @@ const linksMockdata = [
   { label: 'Account', path: '/account' },
   { label: 'SignUp', path: '/signup' },
   { label: 'Login', path: '/login' },
-  { label: 'Settings', path: '/settings' },
+  { label: 'IoT Farm Support', path: '/settings' },
   { label: 'Checkout', path: '/checkout' },
   { label: 'Logout', path: '/logout' },
 ];

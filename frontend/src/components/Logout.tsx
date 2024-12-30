@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Center, Paper, Text, Stack, Image } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; // Import Axios for HTTP requests
-import image from '../assets/logout.png';
+import image from '../assets/chicken2.png';
 
 const LogoutPage: React.FC = () => {
   const navigate = useNavigate();
@@ -39,7 +39,7 @@ const LogoutPage: React.FC = () => {
   };
 
   return (
-    <Center style={{ height: '100vh' }}>
+    <Center style={{ height: '80vh' }}>
       <Paper radius="md" p="xl" withBorder style={{ width: '400px' }}>
         <Stack align="center">
           <Image
