@@ -180,8 +180,8 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## 📬 Contact
 
 For any inquiries, feedback, or support:
-- **Email**: steve.austin@example.com
-- **GitHub**: [Steve Austin](https://github.com/yourusername)
+- **Email**: steveaustine126@gmail.com
+- **GitHub**: [Steve Austin](https://github.com/voste126)
 
 ---
 
