@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Grid, Card, TextInput, Button, Table, RadioGroup, Radio } from '@mantine/core';
 import { useLocation } from 'react-router-dom';
-import {  IconCheck } from '@tabler/icons-react';
+import { IconCheck } from '@tabler/icons-react';
 import { Notification, rem } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,12 +14,20 @@ interface Product {
 
 const Checkout: React.FC = () => {
   const navigate = useNavigate();
-  const [notification, setNotification] = useState<{ title: string; message: string; color: string; icon: React.ReactNode } | null>(null);
+  const [notification, setNotification] = useState<{
+    title: string;
+    message: string;
+    color: string;
+    icon: React.ReactNode;
+  } | null>(null);
+  const [selectedPayment, setSelectedPayment] = useState<string>('');
+  const [paymentDetails, setPaymentDetails] = useState({ cardNumber: '', expiryDate: '', cvv: '', phoneNumber: '', email: '' });
+
   const checkIcon = <IconCheck style={{ width: rem(20), height: rem(20) }} />;
   const location = useLocation();
   const { cart, totalPrice } = location.state || { cart: [], totalPrice: 0 };
 
-  const handlePayment = () => {
+  const handlePaymentSubmit = () => {
     // Placeholder for payment integration logic
     setNotification({
       title: 'Payment Success',
@@ -28,6 +36,64 @@ const Checkout: React.FC = () => {
       icon: checkIcon,
     });
     navigate('/digital-market');
+  };
+
+  const renderPaymentForm = () => {
+    switch (selectedPayment) {
+      case 'credit':
+        return (
+          <>
+            <TextInput
+              label="Card Number"
+              placeholder="1234 5678 9012 3456"
+              required
+              mb="md"
+              value={paymentDetails.cardNumber}
+              onChange={(e) => setPaymentDetails({ ...paymentDetails, cardNumber: e.target.value })}
+            />
+            <TextInput
+              label="Expiry Date"
+              placeholder="MM/YY"
+              required
+              mb="md"
+              value={paymentDetails.expiryDate}
+              onChange={(e) => setPaymentDetails({ ...paymentDetails, expiryDate: e.target.value })}
+            />
+            <TextInput
+              label="CVV"
+              placeholder="123"
+              required
+              mb="md"
+              value={paymentDetails.cvv}
+              onChange={(e) => setPaymentDetails({ ...paymentDetails, cvv: e.target.value })}
+            />
+          </>
+        );
+      case 'mpesa':
+        return (
+          <TextInput
+            label="Phone Number"
+            placeholder="e.g., 254700123456"
+            required
+            mb="md"
+            value={paymentDetails.phoneNumber}
+            onChange={(e) => setPaymentDetails({ ...paymentDetails, phoneNumber: e.target.value })}
+          />
+        );
+      case 'paypal':
+        return (
+          <TextInput
+            label="PayPal Email"
+            placeholder="example@email.com"
+            required
+            mb="md"
+            value={paymentDetails.email}
+            onChange={(e) => setPaymentDetails({ ...paymentDetails, email: e.target.value })}
+          />
+        );
+      default:
+        return null;
+    }
   };
 
   return (
@@ -72,12 +138,21 @@ const Checkout: React.FC = () => {
       {/* Payment Section */}
       <h3>Payment Information</h3>
       <Card withBorder shadow="sm" padding="lg">
-        <RadioGroup label="Select Payment Method" required>
+        <RadioGroup
+          label="Select Payment Method"
+          required
+          value={selectedPayment}
+          onChange={setSelectedPayment}
+        >
           <Radio value="credit" label="Credit Card" />
           <Radio value="paypal" label="PayPal" />
           <Radio value="mpesa" label="MPESA" />
         </RadioGroup>
-        <Button mt="lg" fullWidth onClick={handlePayment}>
+
+        {/* Render Dynamic Payment Form */}
+        {renderPaymentForm()}
+
+        <Button mt="lg" fullWidth onClick={handlePaymentSubmit} disabled={!selectedPayment}>
           Confirm and Pay
         </Button>
       </Card>
@@ -92,3 +167,4 @@ const Checkout: React.FC = () => {
 };
 
 export default Checkout;
+
