@@ -35,7 +35,9 @@ const Checkout: React.FC = () => {
       color: 'green',
       icon: checkIcon,
     });
-    navigate('/digital-market');
+    setTimeout(() => {
+      navigate('/digital-market');
+    }, 5000);
   };
 
   const renderPaymentForm = () => {
@@ -97,7 +99,7 @@ const Checkout: React.FC = () => {
   };
 
   return (
-    <Container>
+    <Container style={{marginBottom: '15rem'}}>
       <h2>Checkout</h2>
       <Grid>
         {/* Order Summary */}
