@@ -16,5 +16,7 @@ COPY . .
 # Expose port 5173 (default Vite port)
 EXPOSE 5173
 
+
 # Command to run the application
-CMD ["npm", "run", "dev", "--", "--host"]
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+
