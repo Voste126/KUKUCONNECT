@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 import os
+import dj_database_url
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -113,7 +114,17 @@ CORS_ALLOWED_ORIGINS = [
 #     }
 # }
 
-DATABASES = {
+# Database
+DATABASE_URL = os.getenv('DATABASE_URL')
+
+if DATABASE_URL:
+    # Use the database settings from DATABASE_URL in production
+    DATABASES = {
+        'default': dj_database_url.config(default=DATABASE_URL)
+    }
+else:
+    # Fallback to local PostgreSQL settings (for development)
+    DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.getenv('DB_NAME'),
@@ -123,27 +134,6 @@ DATABASES = {
             'PORT': os.getenv('DB_PORT'),
         }
     }
-
-# Database
-# DATABASE_URL = os.getenv('DATABASE_URL')
-
-# if DATABASE_URL:
-#     # Use the database settings from DATABASE_URL in production
-#     DATABASES = {
-#         'default': dj_database_url.config(default=DATABASE_URL)
-#     }
-# else:
-#     # Fallback to local PostgreSQL settings (for development)
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.postgresql',
-#             'NAME': os.getenv('DB_NAME'),
-#             'USER': os.getenv('DB_USER'),
-#             'PASSWORD': os.getenv('DB_PASSWORD'),
-#             'HOST': os.getenv('DB_HOST'),
-#             'PORT': os.getenv('DB_PORT'),
-#         }
-#     }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -186,6 +176,7 @@ STATIC_URL = 'static/'
 # settings.py
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # Default primary key field type

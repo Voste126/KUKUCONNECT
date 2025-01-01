@@ -36,6 +36,11 @@ class OrderDetailView(generics.RetrieveDestroyAPIView):
         """
         Ensure the authenticated user can only delete their own orders.
         """
+
+        if getattr(self, 'swagger_fake_view', False):
+            # queryset just for schema generation metadata
+            return Order.objects.none()
+        
         return self.queryset.filter(buyer=self.request.user)
 
 class MarketplaceView(generics.ListAPIView):
