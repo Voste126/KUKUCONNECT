@@ -1,7 +1,30 @@
+// {
+//   "files": [],
+//   "references": [
+//     { "path": "./tsconfig.app.json" },
+//     { "path": "./tsconfig.node.json" }
+//   ]
+// }
 {
   "files": [],
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ]
+  ],
+  "compilerOptions": {
+    "composite": true, // Required for project references
+    "skipLibCheck": true,
+    "target": "ESNext", // Use the latest ES features
+    "module": "ESNext", // Enable ES modules
+    "moduleResolution": "Node", // Resolve modules like Node.js
+    "strict": true, // Enable strict type checking
+    "baseUrl": ".", // Base URL for module resolution
+    "paths": {
+      "@/*": ["src/*"] // Alias for the src directory
+    },
+    "esModuleInterop": true, // Enable compatibility with CommonJS modules
+    "forceConsistentCasingInFileNames": true, // Ensure consistent casing
+    "useDefineForClassFields": true // Align with modern JS field behavior
+  }
 }
+
