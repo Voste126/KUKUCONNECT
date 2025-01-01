@@ -3,6 +3,7 @@ import { Button, Center, Paper, Text, Stack, Image } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; // Import Axios for HTTP requests
 import image from '../assets/chicken2.png';
+import BASE_URL from '../config';
 
 const LogoutPage: React.FC = () => {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ const LogoutPage: React.FC = () => {
       }
 
       await axios.post(
-        'http://localhost:8000/api/users/logout/',
+        `${BASE_URL}/api/users/logout/`,
         { refresh_token: refreshToken },
         {
           headers: {

@@ -15,6 +15,7 @@ import { useForm } from '@mantine/form';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { IconCheck, IconX } from '@tabler/icons-react';
+import BASE_URL from '../config';
 
 // Login Page
 export const LoginPage: React.FC = () => {
@@ -53,7 +54,7 @@ export const LoginPage: React.FC = () => {
   const handleLogin = async () => {
     try {
       const response = await axios.post(
-        'http://localhost:8000/api/users/login/',
+        `${BASE_URL}/api/users/login/`,
         {
           username: form.values.username,
           password: form.values.password,

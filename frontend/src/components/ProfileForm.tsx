@@ -11,6 +11,7 @@ import { useForm } from '@mantine/form';
 import { showNotification} from '@mantine/notifications';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import BASE_URL from '../config';
 
 interface ProfileProps {
   userType: 'farmer' | 'buyer';
@@ -40,7 +41,7 @@ const ProfileForm: React.FC<ProfileProps> = ({ userType }) => {
     const payload = JSON.parse(atob(token.split('.')[1]));
     id = payload.user_id; // Assuming the token payload contains the user ID
   }
-  const apiUrl = `http://localhost:8000/api/profiles/${userType === 'farmer' ? 'farmers' : 'buyers'}/${id}/`;
+  const apiUrl = `${BASE_URL}/api/profiles/${userType === 'farmer' ? 'farmers' : 'buyers'}/${id}/`;
 
   const form = useForm({
     initialValues: {

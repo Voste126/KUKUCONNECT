@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './Chatbot.css';
+import BASE_URL from '../config';
 
 interface Message {
     sender: 'user' | 'bot';
@@ -16,7 +17,7 @@ const Chatbot: React.FC = () => {
         setMessages((prevMessages) => [...prevMessages, userMessage]);
 
         try {
-            const response = await axios.post<{ response: string }>('http://127.0.0.1:8000/api/chatbot/', {
+            const response = await axios.post<{ response: string }>(`${BASE_URL}/api/chatbot/`, {
                 user_input: input
             }, {
                 headers: {

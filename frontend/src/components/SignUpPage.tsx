@@ -15,6 +15,7 @@ import { useForm } from '@mantine/form';
 import { useNavigate } from 'react-router-dom';
 import { IconCheck, IconX } from '@tabler/icons-react';
 import axios from 'axios';
+import BASE_URL from '../config';
 
 // Signup Page
 export const SignupPage: React.FC = () => {
@@ -84,7 +85,7 @@ export const SignupPage: React.FC = () => {
 
     try {
       // Register the user
-      const userResponse = await axios.post('http://localhost:8000/api/users/register/', {
+      const userResponse = await axios.post(`${BASE_URL}/api/users/register/`, {
         username,
         password,
         email,
@@ -94,7 +95,7 @@ export const SignupPage: React.FC = () => {
       const userId = userResponse.data.id;
 
       // Log in the user to get the authentication token
-      const loginResponse = await axios.post('http://localhost:8000/api/users/login/', {
+      const loginResponse = await axios.post(`${BASE_URL}/api/users/login/`, {
         username,
         password,
       });
@@ -103,7 +104,7 @@ export const SignupPage: React.FC = () => {
 
       // Create the profile using the authentication token
       if (userType === 'farmer') {
-        await axios.post('http://localhost:8000/api/profiles/farmers/', {
+        await axios.post(`${BASE_URL}/api/profiles/farmers/`, {
           user_id: userId,
           farm_name: farmName,
           location,
@@ -115,7 +116,7 @@ export const SignupPage: React.FC = () => {
           },
         });
       } else if (userType === 'buyer') {
-        await axios.post('http://localhost:8000/api/profiles/buyers/', {
+        await axios.post(`${BASE_URL}/api/profiles/buyers/`, {
           user_id: userId,
           business_name: businessName,
           phone_number: phoneNumber,

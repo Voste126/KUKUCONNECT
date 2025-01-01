@@ -19,6 +19,7 @@ import {
 import {  IconCheck, IconError404 } from '@tabler/icons-react'
 import { AreaChart, CompositeChart, RadarChart } from '@mantine/charts';
 import { useNavigate } from 'react-router-dom';
+import BASE_URL from '../config';
 
 
 const Dashboard = () => {
@@ -98,7 +99,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/products/my-products/', {
+        const response = await axios.get(`${BASE_URL}/api/products/my-products/`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -116,7 +117,7 @@ const Dashboard = () => {
 
     const fetchOrders = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/products/orders/farmer/', {
+        const response = await axios.get(`${BASE_URL}/api/products/orders/farmer/`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -144,7 +145,7 @@ const Dashboard = () => {
 
     try {
       const response = await axios.put(
-        `http://localhost:8000/api/products/edit/${editingProduct.id}/`,
+        `${BASE_URL}/api/products/edit/${editingProduct.id}/`,
         editingProduct,
         {
           headers: {
@@ -178,26 +179,12 @@ const Dashboard = () => {
   };
 }
 
-  // useEffect(() => {
-  //   const fetchOrders = async () => {
-  //     try {
-  //       const response = await axios.get('http://localhost:8000/api/products/orders/farmer/', {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       });
-  //       setOrders(response.data);
-  //     } catch (error) {
-  //       console.error('Error fetching orders:', error);
-  //     }
-  //   };
-  //   fetchOrders();
-  // }, [token]);
+
 
   const handleAddProduct = async () => {
     try {
       const response = await axios.post(
-        'http://localhost:8000/api/products/new/',
+        `${BASE_URL}/api/products/new/`,
         newProduct,
         {
           headers: {
@@ -227,7 +214,7 @@ const Dashboard = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      await axios.delete(`http://localhost:8000/api/products/edit/${id}/`, {
+      await axios.delete(`${BASE_URL}/api/products/edit/${id}/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProducts(products.filter((product) => product.id !== id));
