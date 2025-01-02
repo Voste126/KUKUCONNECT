@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from drf_yasg.utils import swagger_auto_schema
 
 
 logger = logging.getLogger(__name__)
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 class UserRegistrationView(generics.CreateAPIView):
     serializer_class = CustomUserSerializer
     permission_classes = [permissions.AllowAny]
-
+    @swagger_auto_schema(operation_description="Register a new user", request_body=CustomUserSerializer)
     def post(self, request, *args, **kwargs):
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
@@ -41,7 +42,7 @@ class UserDetailView(APIView):
     API view to retrieve details of the logged-in user.
     """
     permission_classes = [IsAuthenticated]
-
+    @swagger_auto_schema(operation_description="Retrieve details of the logged-in user",operation_summary="Retrieve details of the logged-in user")
     def get(self, request, *args, **kwargs):
         user = request.user
         data = {
@@ -56,7 +57,7 @@ class LogoutView(APIView):
     API view to log out the user and revoke the JWT token.
     """
     permission_classes = [IsAuthenticated]
-
+    @swagger_auto_schema(operation_description="Log out the user and revoke the JWT token",operation_summary="Log out the user and revoke the JWT token")
     def post(self, request):
         try:
             refresh_token = request.data.get("refresh_token")

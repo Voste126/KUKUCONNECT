@@ -1,11 +1,13 @@
 from rest_framework import generics, permissions
 from .models import Product, Order
 from .serializers import ProductSerializer, OrderSerializer
+from drf_yasg.utils import swagger_auto_schema
 
 class ProductListView(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [permissions.IsAuthenticated]
+    
 
 class ProductDetailView(generics.RetrieveAPIView):
     queryset = Product.objects.all()
