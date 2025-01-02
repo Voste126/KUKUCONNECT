@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Button, TextInput, Select, Container, Grid, Table, Card, NumberInput, Group } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import BASE_URL from '@/config';
+
 interface Product {
   id: number;
   title: string;
@@ -27,7 +29,7 @@ const ProductList: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/products/', {
+        const response = await axios.get(`${BASE_URL}/api/products/`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
