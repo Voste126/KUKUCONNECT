@@ -11,7 +11,7 @@ interface Message {
 const Chatbot: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState<string>('');
-
+    const token = localStorage.getItem('accessToken');
     const sendMessage = async () => {
         const userMessage: Message = { sender: 'user', text: input };
         setMessages((prevMessages) => [...prevMessages, userMessage]);
@@ -21,7 +21,8 @@ const Chatbot: React.FC = () => {
                 user_input: input
             }, {
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
                 }
             });
             const botMessage: Message = { sender: 'bot', text: response.data.response };
