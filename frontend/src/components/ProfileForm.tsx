@@ -10,11 +10,11 @@ import {
   Notification,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-// import { showNotification} from '@mantine/notifications';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import BASE_URL from '../config';
 import { IconCheck, IconX } from '@tabler/icons-react';
+
 interface ProfileProps {
   userType: 'farmer' | 'buyer';
 }
@@ -49,10 +49,22 @@ const ProfileForm: React.FC<ProfileProps> = ({ userType }) => {
   const token = localStorage.getItem('accessToken');
   let id = null;
   if (token) {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    id = payload.user_id; // Assuming the token payload contains the user ID
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      id = payload.user_id; // Assuming the token payload contains the user ID
+    } catch (error) {
+      console.error('Error parsing token:', error);
+      navigate('/login');
+    }
+  } else {
+    console.warn('No token found, redirecting to login');
+    navigate('/login');
   }
+
   const apiUrl = `${BASE_URL}/api/profiles/${userType === 'farmer' ? 'farmers' : 'buyers'}/${id}/`;
+  // console.log('API URL:', apiUrl);
+  // console.log('Token:', token);
+  // console.log('User ID:', id);
 
   const form = useForm({
     initialValues: {
@@ -73,16 +85,6 @@ const ProfileForm: React.FC<ProfileProps> = ({ userType }) => {
   });
 
   useEffect(() => {
-    // if (!token) {
-    //   showNotification({
-    //     title: 'Authentication Required',
-    //     message: 'Please log in to view your profile.',
-    //     color: 'red',
-    //   });
-    //   navigate('/login');
-    //   return;
-    // }
-
     const fetchProfile = async () => {
       try {
         const response = await axios.get(apiUrl, {
@@ -90,7 +92,8 @@ const ProfileForm: React.FC<ProfileProps> = ({ userType }) => {
         });
         setProfileData(response.data);
         form.setValues(response.data);
-      } catch {
+      } catch (error) {
+        console.error('Error fetching profile:', error);
         setNotification({
           title: 'Profile Not Found',
           message: 'Could not find your profile. Please try again later.',
@@ -104,7 +107,7 @@ const ProfileForm: React.FC<ProfileProps> = ({ userType }) => {
   }, [apiUrl, token, navigate, form, xicon]);
 
   const handleUpdate = async (values: typeof form.values) => {
-    console.log('Updating profile with values:', values); // Add logging
+    console.log('Updating profile with values:', values);
     try {
       await axios.put(apiUrl, values, {
         headers: {
@@ -112,7 +115,7 @@ const ProfileForm: React.FC<ProfileProps> = ({ userType }) => {
           'Content-Type': 'application/json',
         },
       });
-      console.log('Profile updated successfully'); // Add logging
+      console.log('Profile updated successfully');
       setNotification({
         title: 'Profile Updated',
         message: 'Your profile has been updated successfully.',
@@ -121,7 +124,7 @@ const ProfileForm: React.FC<ProfileProps> = ({ userType }) => {
       });
       navigate('/digital-market');
     } catch (error) {
-      console.error('Error updating profile:', error); // Add logging
+      console.error('Error updating profile:', error);
       setNotification({
         title: 'Profile Update Failed',
         message: 'Could not update your profile. Please try again later.',

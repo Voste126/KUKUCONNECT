@@ -4,6 +4,7 @@ import axios from 'axios';
 import ProfileForm from './ProfileForm';
 import { showNotification } from '@mantine/notifications';
 import { Loader } from '@mantine/core';
+import BASE_URL from '../config';
 
 const AccountRoute = () => {
   const [userType, setUserType] = useState(null); // Store user type ('farmer' or 'buyer')
@@ -22,7 +23,7 @@ const AccountRoute = () => {
           return;
         }
 
-        const response = await axios.get('http://localhost:8000/api/users/me/', {
+        const response = await axios.get(`${BASE_URL}/api/users/me/`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
