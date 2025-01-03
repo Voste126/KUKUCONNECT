@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   Button,
   Group,
@@ -6,13 +6,15 @@ import {
   Stack,
   Text,
   TextInput,
+  rem,
+  Notification,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { showNotification} from '@mantine/notifications';
+// import { showNotification} from '@mantine/notifications';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import BASE_URL from '../config';
-
+import { IconCheck, IconX } from '@tabler/icons-react';
 interface ProfileProps {
   userType: 'farmer' | 'buyer';
 }
@@ -33,7 +35,16 @@ interface BuyerProfile {
 type ProfileData = FarmerProfile | BuyerProfile;
 
 const ProfileForm: React.FC<ProfileProps> = ({ userType }) => {
+  const checkIcon = <IconCheck style={{ width: rem(20), height: rem(20) }} />;
+  const xicon = useMemo(() => <IconX style={{ width: rem(20), height: rem(20) }} />, []);
+
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [notification, setNotification] = useState<{
+    title: string;
+    message: string;
+    color: string;
+    icon: React.ReactNode;
+  } | null>(null);
   const navigate = useNavigate();
   const token = localStorage.getItem('accessToken');
   let id = null;
@@ -62,15 +73,15 @@ const ProfileForm: React.FC<ProfileProps> = ({ userType }) => {
   });
 
   useEffect(() => {
-    if (!token) {
-      showNotification({
-        title: 'Authentication Required',
-        message: 'Please log in to view your profile.',
-        color: 'red',
-      });
-      navigate('/login');
-      return;
-    }
+    // if (!token) {
+    //   showNotification({
+    //     title: 'Authentication Required',
+    //     message: 'Please log in to view your profile.',
+    //     color: 'red',
+    //   });
+    //   navigate('/login');
+    //   return;
+    // }
 
     const fetchProfile = async () => {
       try {
@@ -80,16 +91,17 @@ const ProfileForm: React.FC<ProfileProps> = ({ userType }) => {
         setProfileData(response.data);
         form.setValues(response.data);
       } catch {
-        showNotification({
-          title: 'Error Fetching Profile',
-          message: 'Could not fetch profile details. Please try again later.',
+        setNotification({
+          title: 'Profile Not Found',
+          message: 'Could not find your profile. Please try again later.',
           color: 'red',
+          icon: xicon,
         });
       }
     };
 
     fetchProfile();
-  }, [apiUrl, token, navigate, form]);
+  }, [apiUrl, token, navigate, form, xicon]);
 
   const handleUpdate = async (values: typeof form.values) => {
     console.log('Updating profile with values:', values); // Add logging
@@ -101,18 +113,20 @@ const ProfileForm: React.FC<ProfileProps> = ({ userType }) => {
         },
       });
       console.log('Profile updated successfully'); // Add logging
-      showNotification({
+      setNotification({
         title: 'Profile Updated',
-        message: 'Your profile has been successfully updated.',
+        message: 'Your profile has been updated successfully.',
         color: 'teal',
+        icon: checkIcon,
       });
       navigate('/digital-market');
     } catch (error) {
       console.error('Error updating profile:', error); // Add logging
-      showNotification({
-        title: 'Update Failed',
+      setNotification({
+        title: 'Profile Update Failed',
         message: 'Could not update your profile. Please try again later.',
         color: 'red',
+        icon: xicon,
       });
     }
   };
@@ -175,6 +189,12 @@ const ProfileForm: React.FC<ProfileProps> = ({ userType }) => {
         </form>
       ) : (
         <Text>Loading profile...</Text>
+      )}
+
+      {notification && (
+        <Notification icon={notification.icon} color={notification.color} title={notification.title} mt="md">
+          {notification.message}
+        </Notification>
       )}
     </Paper>
   );
