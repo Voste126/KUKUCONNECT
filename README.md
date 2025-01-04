@@ -146,6 +146,7 @@ cd kukuconnect
 
 ## 📂 Project Structure
 
+```bash
 kukuconnect/
 ├── frontend/
 │   ├── public/
@@ -157,6 +158,7 @@ kukuconnect/
 │   ├── manage.py
 │   └── requirements.txt
 └── README.md
+```
 
 ---
 
