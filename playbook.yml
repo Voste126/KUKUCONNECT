@@ -1,0 +1,24 @@
+- name: Configure EKS Nodes
+  hosts: all
+  tasks:
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Install kubectl
+      get_url:
+        url: https://amazon-eks.s3.us-west-2.amazonaws.com/1.18.9/2020-11-02/bin/linux/amd64/kubectl
+        dest: /usr/local/bin/kubectl
+        mode: '0755'
+
+    - name: Install AWS CLI
+      apt:
+        name: awscli
+        state: present
+
+- name: Deploy Backend Server
+  hosts: localhost
+  tasks:
+    - name: Apply Kubernetes manifests
+      command: kubectl apply -f k8s-manifests/

@@ -26,16 +26,19 @@ KUKUCONNECT is a modern AgriTech platform designed to bridge the gap between far
 
 ## 🛠️ Tech Stack
 
-### Frontend:
+### Frontend
+
 - **ReactJS**
 - **MantineUI**: For styling and UI components.
 - **Axios**: For API communication.
 
-### Backend:
+### Backend
+
 - **Django**: API development and backend logic.
 - **Python**: Core backend language.
 
-### Payment Gateway:
+### Payment Gateway
+
 - **MPESA Integration**: Simplifying payments for users.
 
 ---
@@ -45,56 +48,82 @@ KUKUCONNECT is a modern AgriTech platform designed to bridge the gap between far
 Follow these steps to set up KUKUCONNECT on your local machine:
 
 ### Prerequisites
+
 - Node.js and npm
 - Python 3.x and pip
 - PostgreSQL database
 - Virtual environment tool (optional but recommended)
 
 ### 1️⃣ Clone the Repository
+
 ```bash
-git clone https://github.com/yourusername/kukuconnect.git
+git clone https://github.com/Voste126/KUKUCONNECT.git 
 cd kukuconnect
 ```
 
 ### 2️⃣ Frontend Setup
+
 1. Navigate to the frontend folder:
+
    ```bash
+
    cd frontend
    ```
+
 2. Install dependencies:
+
    ```bash
    npm install
+
    ```
+
 3. Start the development server:
+
    ```bash
    npm start
    ```
 
 ### 3️⃣ Backend Setup
+
 1. Navigate to the backend folder:
+
    ```bash
    cd backend
    ```
+
 2. Create a virtual environment and activate it:
+
    ```bash
    python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   source venv/bin/activate
+     # On Windows: venv\Scripts\activate
    ```
+
 3. Install dependencies:
+
    ```bash
+
    pip install -r requirements.txt
+
    ```
+
 4. Apply migrations:
+
    ```bash
    python manage.py migrate
+
    ```
+
 5. Start the server:
+
    ```bash
    python manage.py runserver
    ```
 
 ### 4️⃣ Configure Environment Variables
+
 - Add a `.env` file in the backend directory with the following details:
+
   ```env
   SECRET_KEY=your-secret-key
   DEBUG=True
@@ -104,14 +133,19 @@ cd kukuconnect
   ```
 
 ### 5️⃣ Access the Application
+
 - Frontend: `http://localhost:3000`
 - Backend: `http://127.0.0.1:8000`
+
+## Deployed Application
+
+- **Frontend**: [https://kukuconnect-frontend.onrender.com](https://kukuconnect-frontend.onrender.com)
+- **Backend**: [https://kukuconnect.onrender.com](https://kukuconnect.onrender.com)
 
 ---
 
 ## 📂 Project Structure
 
-```
 kukuconnect/
 ├── frontend/
 │   ├── public/
@@ -123,7 +157,6 @@ kukuconnect/
 │   ├── manage.py
 │   └── requirements.txt
 └── README.md
-```
 
 ---
 
@@ -143,17 +176,27 @@ Contributions are always welcome! Follow these steps to contribute:
 
 1. Fork the repository.
 2. Create a feature branch:
+
    ```bash
+
    git checkout -b feature/your-feature-name
+
    ```
+
 3. Commit your changes:
+
    ```bash
    git commit -m "Add your message here"
+
    ```
+
 4. Push to your branch:
+
    ```bash
    git push origin feature/your-feature-name
+
    ```
+
 5. Open a Pull Request.
 
 ---
@@ -179,8 +222,9 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## 📬 Contact
 
-For any inquiries, feedback, or support:
-- **Email**: steveaustine126@gmail.com
+For any inquiries, feedback, or support
+
+- **Email**: [steveaustine126@gmail.com](mailto:steveaustine126@gmail.com)
 - **GitHub**: [Steve Austin](https://github.com/voste126)
 
 ---
@@ -190,14 +234,14 @@ For any inquiries, feedback, or support:
 If you find this project useful, feel free to give it a ⭐ on GitHub and share it with others!
 
 ---
-```
 
-### Features of This README:
+### Features of This README
+
 1. **Comprehensive Setup Instructions:** Guides users step-by-step to set up both frontend and backend.
 2. **Project Structure:** Helps contributors understand the repository layout.
 3. **Roadmap:** Provides insight into the project's future direction.
 4. **Contribution Guidelines:** Encourages community participation with clear instructions.
 5. **Acknowledgments and Support:** Builds rapport with the community.
-6. **Contact Information:** Makes it easy for users and contributors to reach you. 
+6. **Contact Information:** Makes it easy for users and contributors to reach you.
 
 Let me know if you need further customization!
