@@ -9,9 +9,21 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
+# Install system dependencies required for Python packages
+# These are needed for psycopg2-binary, cryptography, and other packages with C extensions
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
+    libssl-dev \
+    libffi-dev \
+    python3-dev \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install pip requirements
 COPY requirements.txt .
-RUN python -m pip install -r requirements.txt
+RUN python -m pip install --upgrade pip && \
+    python -m pip install -r requirements.txt
 
 WORKDIR /app
 COPY . /app
