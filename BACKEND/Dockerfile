@@ -37,11 +37,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 libssl3 libjpeg62-turbo zlib1g \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
-# copy wheelhouse and install from it (no network)
-COPY --from=builder /wheels/wheelhouse /wheels/wheelhouse
-RUN python -m pip install --no-index --find-links=/wheels/wheelhouse -r /wheels/requirements.txt
+# Copy requirements.txt and wheelhouse from builder stage
+COPY --from=builder /wheels/requirements.txt /tmp/requirements.txt
+COPY --from=builder /wheels/wheelhouse /tmp/wheelhouse
 
+# Install from pre-built wheels
+RUN python -m pip install --no-index --find-links=/tmp/wheelhouse -r /tmp/requirements.txt
+
+WORKDIR /app
 COPY . /app
 
 # Non-root user
