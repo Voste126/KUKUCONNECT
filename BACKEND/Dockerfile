@@ -38,8 +38,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-# copy wheelhouse and install from it (no network)
+# copy wheelhouse and requirements.txt from builder, then install from wheelhouse
 COPY --from=builder /wheels/wheelhouse /wheels/wheelhouse
+COPY --from=builder /wheels/requirements.txt /wheels/requirements.txt
 RUN python -m pip install --no-index --find-links=/wheels/wheelhouse -r /wheels/requirements.txt
 
 COPY . /app
