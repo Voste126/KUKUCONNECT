@@ -34,7 +34,7 @@ ENV PYTHONUNBUFFERED=1
 
 # Install only runtime OS deps (smaller)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq5 libssl1.1 libjpeg62-turbo zlib1g \
+    libpq5 libssl3 libjpeg62-turbo zlib1g \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
