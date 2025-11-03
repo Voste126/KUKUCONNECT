@@ -19,8 +19,7 @@ const customTheme: MantineThemeOverride = {
       '#006400',
       '#006400',
       '#006400',
-      '#006400', // Add variations for consistency
-
+      '#006400',
     ],
     blue: [
       '#8B4513',
@@ -51,7 +50,7 @@ const customTheme: MantineThemeOverride = {
   primaryColor: 'green', // Set the primary color for the app
   fontFamily: 'Poppins, sans-serif', // Use Poppins across the app
   headings: {
-    fontFamily: 'Poppins, sans-serif', // Apply Poppins to all headings // Add consistent font weight for headings
+    fontFamily: 'Poppins, sans-serif', // Apply Poppins to all headings
   },
 };
 
@@ -64,4 +63,3 @@ createRoot(document.getElementById('root')!).render(
     </MantineProvider>
   </StrictMode>
 );
-
