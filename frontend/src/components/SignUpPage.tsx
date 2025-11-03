@@ -10,20 +10,26 @@ import {
   Title,
   Notification,
   rem,
+  Alert, 
+  List,   
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useNavigate } from 'react-router-dom';
-import { IconCheck, IconX } from '@tabler/icons-react';
-import axios from 'axios';
+import { IconCheck,IconAlertCircle } from '@tabler/icons-react'; // <-- IconX is no longer used here
+import axios, { AxiosError } from 'axios'; 
 import BASE_URL from '../config';
 
 // Signup Page
 export const SignupPage: React.FC = () => {
   const [active, setActive] = useState(0);
   const navigate = useNavigate();
+  
+  const [error, setError] = useState<string[] | string | null>(null);
+  const [loading, setLoading] = useState(false); 
+
   const [notification, setNotification] = useState<{ title: string; message: string; color: string; icon: React.ReactNode } | null>(null);
   const checkIcon = <IconCheck style={{ width: rem(20), height: rem(20) }} />;
-  const xicon = <IconX style={{ width: rem(20), height: rem(20) }} />;
+  // const xicon = <IconX style={{ width: rem(20), height: rem(20) }} />; // <-- REMOVED: This was unused
 
   const form = useForm({
     initialValues: {
@@ -42,32 +48,28 @@ export const SignupPage: React.FC = () => {
     validate: (values) => {
       if (active === 0) {
         return {
-          username: values.username.trim().length < 1 ? 'Username is required and must include valid characters' : null,
-          password: values.password.length < 6 ? 'Password must include at least 6 characters' : null,
+          username: values.username.trim().length < 1 ? 'Username is required' : null,
+          password: values.password.length < 10 ? 'Password must be at least 10 characters' : null,
         };
       }
-
       if (active === 1) {
         return {
           email: !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email) ? 'Invalid email' : null,
           userType: values.userType ? null : 'Please select user type',
         };
       }
-
       if (active === 2 && values.userType === 'farmer') {
         return {
           farmName: values.farmName.trim().length < 1 ? 'Farm name is required' : null,
           location: values.location.trim().length < 1 ? 'Location is required' : null,
-          phoneNumber: values.phoneNumber.trim().length < 1 ? 'Phone number is required' : null,
+          phoneNumber: /^\+?\d{10,15}$/.test(values.phoneNumber) ? null : 'A valid phone number is required',
         };
       }
-
       if (active === 2 && values.userType === 'buyer') {
         return {
-          phoneNumber: values.phoneNumber.trim().length < 1 ? 'Phone number is required' : null,
+          phoneNumber: /^\+?\d{10,15}$/.test(values.phoneNumber) ? null : 'A valid phone number is required',
         };
       }
-
       return {};
     },
   });
@@ -83,48 +85,44 @@ export const SignupPage: React.FC = () => {
   const handleSignup = async () => {
     const { username, password, email, userType, farmName, location, phoneNumber, farmSize, businessName, preferredProducts } = form.values;
 
+    setError(null); 
+    setNotification(null);
+    setLoading(true); 
+
     try {
-      // Register the user
-      const userResponse = await axios.post(`${BASE_URL}/api/users/register/`, {
+      // Step 1: Register the user
+      await axios.post(`${BASE_URL}/api/users/register/`, {
         username,
         password,
         email,
-        user_type: userType,
+        role: userType, 
       });
 
-      const userId = userResponse.data.id;
-
-      // Log in the user to get the authentication token
+      // Step 2: Log in the user to get the token
       const loginResponse = await axios.post(`${BASE_URL}/api/users/login/`, {
         username,
         password,
       });
 
       const token = loginResponse.data.access;
-
-      // Create the profile using the authentication token
+      
+      // Step 3: Create the profile using the token
       if (userType === 'farmer') {
-        await axios.post(`${BASE_URL}/api/profiles/farmers/`, {
-          user_id: userId,
+        await axios.post(`${BASE_URL}/api/profiles/farmer/`, { 
           farm_name: farmName,
           location,
           phone_number: phoneNumber,
-          farm_size: farmSize,
+          farm_size: farmSize || undefined, 
         }, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
       } else if (userType === 'buyer') {
-        await axios.post(`${BASE_URL}/api/profiles/buyers/`, {
-          user_id: userId,
-          business_name: businessName,
+        await axios.post(`${BASE_URL}/api/profiles/buyer/`, { 
+          business_name: businessName || undefined,
           phone_number: phoneNumber,
-          preferred_products: preferredProducts,
+          preferred_products: preferredProducts || undefined,
         }, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
       }
 
@@ -136,29 +134,55 @@ export const SignupPage: React.FC = () => {
       });
 
       navigate('/login');
-    } catch (error) {
-      setNotification({
-        title: 'Signup Failed',
-        message: 'An error occurred while creating your account. Please try again. If the problem persists, contact supportwith the following complaint:'+ error,
-        icon: xicon,
-        color: 'red',
-      });
+
+    } catch (err) {
+      const error = err as AxiosError;
+      const errorMessages: string[] = [];
+      
+      if (error.response && error.response.status === 400) {
+        const backendErrors = error.response.data as Record<string, string[]>;
+        for (const key in backendErrors) {
+          errorMessages.push(`${key}: ${backendErrors[key][0]}`);
+        }
+      } else {
+        errorMessages.push('An unexpected error occurred. Please try again.');
+      }
+      
+      setError(errorMessages);
+      setActive(0);
+    } finally {
+      setLoading(false); 
     }
   };
 
   return (
     <Container size="sm">
       <Title mt="md" mb="lg">Sign Up</Title>
+
+      {error && (
+        <Alert icon={<IconAlertCircle size="1rem" />} title="Registration Failed" color="red" withCloseButton onClose={() => setError(null)} mb="md">
+          {Array.isArray(error) ? (
+            <List>
+              {error.map((msg, index) => <List.Item key={index}>{msg}</List.Item>)}
+            </List>
+          ) : (
+            error
+          )}
+        </Alert>
+      )}
+
       <Stepper active={active} onStepClick={setActive} >
         <Stepper.Step label="Account Details" description="Set your account credentials">
           <TextInput
             label="Username"
+            description="This will be your unique login name." 
             placeholder="Enter username"
             {...form.getInputProps('username')}
           />
           <PasswordInput
             mt="md"
             label="Password"
+            description="Must be at least 10 characters long. Make it strong!" 
             placeholder="Enter password"
             {...form.getInputProps('password')}
           />
@@ -168,6 +192,7 @@ export const SignupPage: React.FC = () => {
           <TextInput
             mt="md"
             label="Email"
+            description="We will use this to verify your account." 
             placeholder="Enter your email"
             {...form.getInputProps('email')}
           />
@@ -186,52 +211,17 @@ export const SignupPage: React.FC = () => {
         <Stepper.Step label="Profile Information" description="Enter your profile details">
           {form.values.userType === 'farmer' && (
             <>
-              <TextInput
-                mt="md"
-                label="Farm Name"
-                placeholder="Enter your farm name"
-                {...form.getInputProps('farmName')}
-              />
-              <TextInput
-                mt="md"
-                label="Location"
-                placeholder="Enter your location"
-                {...form.getInputProps('location')}
-              />
-              <TextInput
-                mt="md"
-                label="Phone Number"
-                placeholder="Enter your phone number"
-                {...form.getInputProps('phoneNumber')}
-              />
-              <TextInput
-                mt="md"
-                label="Farm Size"
-                placeholder="Enter your farm size"
-                {...form.getInputProps('farmSize')}
-              />
+              <TextInput mt="md" label="Farm Name" placeholder="Enter your farm name" {...form.getInputProps('farmName')} />
+              <TextInput mt="md" label="Location" placeholder="Enter your location" {...form.getInputProps('location')} />
+              <TextInput mt="md" label="Phone Number" placeholder="e.g. 0712345678" {...form.getInputProps('phoneNumber')} />
+              <TextInput mt="md" label="Farm Size (Optional)" placeholder="e.g. 5 acres" {...form.getInputProps('farmSize')} />
             </>
           )}
           {form.values.userType === 'buyer' && (
             <>
-              <TextInput
-                mt="md"
-                label="Business Name"
-                placeholder="Enter your business name"
-                {...form.getInputProps('businessName')}
-              />
-              <TextInput
-                mt="md"
-                label="Phone Number"
-                placeholder="Enter your phone number"
-                {...form.getInputProps('phoneNumber')}
-              />
-              <TextInput
-                mt="md"
-                label="Preferred Products"
-                placeholder="Enter your preferred products"
-                {...form.getInputProps('preferredProducts')}
-              />
+              <TextInput mt="md" label="Business Name (Optional)" placeholder="Enter your business name" {...form.getInputProps('businessName')} />
+              <TextInput mt="md" label="Phone Number" placeholder="e.g. 0712345678" {...form.getInputProps('phoneNumber')} />
+              <TextInput mt="md" label="Preferred Products (Optional)" placeholder="e.g. Eggs, Broilers" {...form.getInputProps('preferredProducts')} />
             </>
           )}
         </Stepper.Step>
@@ -250,7 +240,9 @@ export const SignupPage: React.FC = () => {
           <Button variant="default" onClick={prevStep}>Back</Button>
         )}
         {active === 3 ? (
-          <Button onClick={handleSignup}>Submit</Button>
+          <Button onClick={handleSignup} loading={loading}>
+            {loading ? 'Submitting...' : 'Submit'}
+          </Button>
         ) : (
           <Button onClick={nextStep}>Next</Button>
         )}

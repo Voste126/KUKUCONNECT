@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 import logging
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.response import Response
@@ -25,11 +25,24 @@ class FarmerProfileDetailView(generics.RetrieveUpdateAPIView):
     queryset = FarmerProfile.objects.all()
     serializer_class = FarmerProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
-    lookup_field = 'user_id'
+    
+    # REMOVED: lookup_field = 'user_id' (This was insecure)
 
-    @swagger_auto_schema(operation_description="Retrieve a Farmer Profile")
-    def get_queryset(self):
-        return self.queryset.filter(user_id=self.kwargs['user_id'])
+    # ---
+    # FIXED: BROKEN ACCESS CONTROL
+    # This function retrieves the profile object for the currently
+    # authenticated user, ignoring any ID passed in the URL.
+    # This ensures a user can ONLY see and edit their *own* profile.
+    # ---
+    @swagger_auto_schema(operation_description="Retrieve or Update the logged-in Farmer's Profile")
+    def get_object(self):
+        """
+        Return the profile for the currently authenticated user.
+        """
+        # Ensure we get the profile linked to the user making the request
+        obj = get_object_or_404(self.get_queryset(), user=self.request.user)
+        self.check_object_permissions(self.request, obj)
+        return obj
 
 # Buyer Profile Views
 class BuyerProfileCreateView(generics.CreateAPIView):
@@ -47,8 +60,20 @@ class BuyerProfileDetailView(generics.RetrieveUpdateAPIView):
     queryset = BuyerProfile.objects.all()
     serializer_class = BuyerProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
-    lookup_field = 'user_id'
+    
+    # REMOVED: lookup_field = 'user_id' (This was insecure)
 
-    @swagger_auto_schema(operation_description="Retrieve a Buyer Profile")
-    def get_queryset(self):
-        return self.queryset.filter(user_id=self.kwargs['user_id'])
+    # ---
+    # FIXED: BROKEN ACCESS CONTROL
+    # Same fix as FarmerProfileDetailView.
+    # This ensures a user can ONLY see and edit their *own* profile.
+    # ---
+    @swagger_auto_schema(operation_description="Retrieve or Update the logged-in Buyer's Profile")
+    def get_object(self):
+        """
+        Return the profile for the currently authenticated user.
+        """
+        # Ensure we get the profile linked to the user making the request
+        obj = get_object_or_404(self.get_queryset(), user=self.request.user)
+        self.check_object_permissions(self.request, obj)
+        return obj

@@ -1,105 +1,98 @@
-import { useState } from 'react';
+import { Group, Code, Image } from '@mantine/core';
 import {
-  IconFingerprint,
-  IconShoppingCart,
-  IconBrain,
-  IconGauge,
-  IconHome2,
-  IconSettings,
-  IconUser,
+  IconKey,
+  IconHome,
+  IconTruckDelivery,
+  IconDashboard,
+  IconUserPlus,
   IconLogout,
-  IconCheck,
+  IconUserCircle,
 } from '@tabler/icons-react';
-import { Title, Tooltip, UnstyledButton } from '@mantine/core';
-// import { MantineLogo } from '@mantinex/mantine-logo';
-import classes from './DoubleNavbar.module.css';
-import { useNavigate } from 'react-router-dom';
+import classes from './Navbar.module.css';
+import KCNlogo from '../assets/KCNlogo.png';
+// ---
+// FIXED: Removed 'useNavigate' since it wasn't being used.
+// ---
+import { Link, useLocation } from 'react-router-dom';
 
-const mainLinksMockdata = [
-  { icon: IconHome2, label: 'Home', path: '/' },
-  { icon: IconGauge, label: 'Dashboard', path: '/dashboard' },
-  { icon: IconShoppingCart, label: 'Digital Market', path: '/digital-market' },
-  { icon: IconBrain, label: 'AI/IoT', path: '/ai-iot' },
-  { icon: IconUser, label: 'Account', path: '/account' },
-  { icon: IconFingerprint, label: 'SignUp', path: '/signup' },
-  { icon: IconFingerprint, label: 'SignUp', path: '/login' },
-  { icon: IconSettings, label: 'Settings', path: '/settings' },
-  { icon: IconCheck, label: 'Checkout', path: '/checkout' },
-  { icon: IconLogout, label: 'Logout', path: '/logout' },
+// Links for GUESTS (not logged in)
+const guestLinks = [
+  { link: '/', label: 'Home', icon: IconHome },
+  { link: '/login', label: 'Login', icon: IconKey },
+  { link: '/signup', label: 'Signup', icon: IconUserPlus },
 ];
 
-const linksMockdata = [
-  { label: 'Home', path: '/' },
-  { label: 'Dashboard', path: '/dashboard' },
-  { label: 'Digital Market', path: '/digital-market' },
-  { label: 'AI support', path: '/ai-iot' },
-  { label: 'Account', path: '/account' },
-  { label: 'SignUp', path: '/signup' },
-  { label: 'Login', path: '/login' },
-  { label: 'IoT Farm Support', path: '/settings' },
-  { label: 'Checkout', path: '/checkout' },
-  { label: 'Logout', path: '/logout' },
+// Links for LOGGED IN users (Buyers and Farmers)
+const userLinks = [
+  { link: '/', label: 'Home', icon: IconHome },
+  { link: '/digital-market', label: 'Digital Market', icon: IconTruckDelivery },
+  { link: '/profile', label: 'My Profile', icon: IconUserCircle }, 
 ];
 
-export function DoubleNavbar() {
-  const [active, setActive] = useState('Menu');
-  const [activeLink, setActiveLink] = useState('Home');
-  const navigate = useNavigate();
+// Links for FARMERS ONLY
+const farmerLinks = [
+  { link: '/dashboard', label: 'Dashboard', icon: IconDashboard },
+];
 
-  const mainLinks = mainLinksMockdata.map((link) => (
-  <Tooltip
-    label={link.label}
-    position="right"
-    withArrow
-    transitionProps={{ duration: 0 }}
-    key={link.label + link.path} // Ensure unique key by combining label and path
-  >
-    <UnstyledButton
-      onClick={() => {
-        setActive(link.label);
-        navigate(link.path);
-      }}
-      className={classes.mainLink}
-      data-active={link.label === active || undefined}
+export function Navbar() {
+  // ---
+  // FIXED: Removed 'const navigate = useNavigate();'
+  // ---
+  
+  // Get the current URL path
+  const { pathname } = useLocation();
+
+  // Get auth state directly from localStorage
+  const token = localStorage.getItem('accessToken');
+  const role = localStorage.getItem('userRole');
+
+  // Build the links to show based on auth state
+  let linksToShow = guestLinks; // Default to guest
+
+  if (token) {
+    if (role === 'farmer') {
+      // Farmer sees user links + farmer links
+      linksToShow = [...userLinks, ...farmerLinks];
+    } else {
+      // Buyer (or other roles) just sees user links
+      linksToShow = userLinks;
+    }
+  }
+
+  const links = linksToShow.map((item) => (
+    <Link
+      className={classes.link}
+      // Active state is set by matching the URL
+      data-active={pathname === item.link || undefined}
+      to={item.link}
+      key={item.label}
     >
-      <link.icon size={22} stroke={1.5} />
-    </UnstyledButton>
-  </Tooltip>
-));
-
-  const links = linksMockdata.map((link) => (
-  <a
-    className={classes.link}
-    data-active={activeLink === link.label || undefined}
-    href="#"
-    onClick={(event) => {
-      event.preventDefault();
-      setActiveLink(link.label);
-      navigate(link.path);
-    }}
-    key={link.label + link.path} // Ensure unique key by combining label and path
-  >
-    {link.label}
-  </a>
-));
+      <item.icon className={classes.linkIcon} stroke={1.5} />
+      <span>{item.label}</span>
+    </Link>
+  ));
 
   return (
     <nav className={classes.navbar}>
-      <div className={classes.wrapper}>
-        <div className={classes.aside}>
-          <div className={classes.logo}>
-            {/* <MantineLogo type="mark" size={30} /> */}
-          </div>
-          {mainLinks}
-        </div>
-        <div className={classes.main}>
-          <Title order={4} className={classes.title}>
-            {active}
-          </Title>
+      <div className={classes.navbarMain}>
+        <Group className={classes.header} justify="space-between">
+          <Image src={KCNlogo} alt="Kukuconnect Logo" w={150} />
+          <Code fw={700}>v1.0.0</Code>
+        </Group>
+        {links}
+      </div>
 
-          {links}
-        </div>
+      <div className={classes.footer}>
+        {/* Show Logout link only if logged in */}
+        {token ? (
+          <Link to="/logout" className={classes.link}>
+            <IconLogout className={classes.linkIcon} stroke={1.5} />
+            <span>Logout</span>
+          </Link>
+        ) : null}
       </div>
     </nav>
   );
 }
+
+export default Navbar;
