@@ -10,9 +10,6 @@ import {
 } from '@tabler/icons-react';
 import classes from './Navbar.module.css';
 import KCNlogo from '../assets/KCNlogo.png';
-// ---
-// FIXED: Removed 'useNavigate' since it wasn't being used.
-// ---
 import { Link, useLocation } from 'react-router-dom';
 
 // Links for GUESTS (not logged in)
@@ -24,7 +21,6 @@ const guestLinks = [
 
 // Links for LOGGED IN users (Buyers and Farmers)
 const userLinks = [
-  { link: '/', label: 'Home', icon: IconHome },
   { link: '/digital-market', label: 'Digital Market', icon: IconTruckDelivery },
   { link: '/profile', label: 'My Profile', icon: IconUserCircle }, 
 ];
@@ -35,10 +31,6 @@ const farmerLinks = [
 ];
 
 export function Navbar() {
-  // ---
-  // FIXED: Removed 'const navigate = useNavigate();'
-  // ---
-  
   // Get the current URL path
   const { pathname } = useLocation();
 
@@ -62,7 +54,8 @@ export function Navbar() {
   const links = linksToShow.map((item) => (
     <Link
       className={classes.link}
-      // Active state is set by matching the URL
+      // THE FIX: This logic must be an exact match (pathname === item.link)
+      // Your old code might have used .startsWith(), which causes this bug.
       data-active={pathname === item.link || undefined}
       to={item.link}
       key={item.label}

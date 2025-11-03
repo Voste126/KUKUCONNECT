@@ -9,11 +9,16 @@ import {
   Title,
   Notification,
   rem,
-  Alert, // <-- Import Alert
+  Alert,
+  Box,      // <-- 1. Import Box for centering
+  Paper,    // <-- 2. Import Paper for the card UI
+  Text,     // <-- 3. Import Text
+  Anchor,   // <-- 4. Import Anchor
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useNavigate } from 'react-router-dom';
-import axios, { AxiosError } from 'axios'; // <-- Import AxiosError
+// 5. Import Link
+import { useNavigate, Link } from 'react-router-dom'; 
+import axios, { AxiosError } from 'axios';
 import { IconCheck, IconAlertCircle } from '@tabler/icons-react';
 import BASE_URL from '../config';
 
@@ -27,7 +32,6 @@ export const LoginPage: React.FC = () => {
 
   const [notification, setNotification] = useState<{ title: string; message: string; color: string; icon: React.ReactNode } | null>(null);
   const checkIcon = <IconCheck style={{ width: rem(20), height: rem(20) }} />;
-  // const xicon = <IconX style={{ width: rem(20), height: rem(20) }} />; // <-- This was unused
 
   const form = useForm({
     initialValues: {
@@ -72,34 +76,38 @@ export const LoginPage: React.FC = () => {
         }
       );
 
-      const { access, refresh } = response.data;
-      
-      // ---
-      // ADDED: Parse token and save role to localStorage
-      // ---
-      let userRole = 'buyer'; // Default to buyer
-      try {
-        // Decode the payload (the middle part of the JWT)
-        const payload = JSON.parse(atob(access.split('.')[1]));
-        if (payload.role) {
-          userRole = payload.role; // Get the role from the token
+      // Prefer role from response body, fallback to JWT payload, then default to buyer
+      const access: string | undefined = response.data?.access;
+      const refresh: string | undefined = response.data?.refresh;
+      const roleFromBody: string | undefined = response.data?.user?.user_type || response.data?.user_type;
+
+      let userRole = roleFromBody ?? 'buyer';
+      if (!roleFromBody && access) {
+        try {
+          const payload = JSON.parse(atob(access.split('.')[1]));
+          userRole = (payload.user_type || payload.role || 'buyer') as string;
+        } catch {
+          // ignore parse errors; keep default
         }
-      } catch (e) {
-        console.error("Failed to parse access token:", e);
-        // Will proceed with default 'buyer' role
       }
 
-      localStorage.setItem('accessToken', access);
-      localStorage.setItem('refreshToken', refresh);
-      localStorage.setItem('userRole', userRole); // <-- STORE THE ROLE
+      if (access) localStorage.setItem('accessToken', access);
+      if (refresh) localStorage.setItem('refreshToken', refresh);
+      localStorage.setItem('userRole', userRole);
 
       setNotification({
         title: 'Login Successful',
-        message: 'Welcome back! Redirecting to the digital market...',
+        message: 'Welcome back! Redirecting...',
         icon: checkIcon,
         color: 'teal',
       });
-      navigate('/digital-market');
+      
+      // Redirect based on role
+      if (userRole === 'farmer') {
+        navigate('/dashboard');
+      } else {
+        navigate('/digital-market');
+      }
 
     } catch (err) {
       const error = err as AxiosError;
@@ -114,54 +122,78 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <Container size="sm">
-      <Title mt="md" mb="lg">Login to KukuConnect</Title>
-      <Stepper active={active} onStepClick={setActive}>
-        <Stepper.Step label="Account Details" description="Enter your login credentials">
+    // 6. This Box centers everything vertically and horizontally
+    <Box
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'var(--mantine-color-gray-0)', // A light background
+      }}
+    >
+      <Container size="sm" style={{ width: '100%', maxWidth: 500 }}>
+        {/* 7. The Paper component creates the form card */}
+        <Paper withBorder shadow="md" p="xl" radius="md">
+          <Title ta="center" mt="md" mb="lg">Login to KukuConnect</Title>
           
-          {error && (
-            <Alert icon={<IconAlertCircle size="1rem" />} title="Login Failed" color="red" withCloseButton onClose={() => setError(null)} mb="md">
-              {error}
-            </Alert>
-          )}
+          <Stepper active={active} onStepClick={setActive}>
+            <Stepper.Step label="Account Details" description="Enter your login credentials">
+              
+              {error && (
+                <Alert icon={<IconAlertCircle size="1rem" />} title="Login Failed" color="red" withCloseButton onClose={() => setError(null)} mb="md">
+                  {error}
+                </Alert>
+              )}
 
-          <TextInput
-            label="Username"
-            description="Enter the username you registered with." 
-            placeholder="Enter your username"
-            {...form.getInputProps('username')}
-          />
-          <PasswordInput
-            mt="md"
-            label="Password"
-            description="Passwords are case-sensitive." 
-            placeholder="Enter your password"
-            {...form.getInputProps('password')}
-          />
-        </Stepper.Step>
+              <TextInput
+                label="Username"
+                description="Enter the username you registered with." 
+                placeholder="Enter your username"
+                {...form.getInputProps('username')}
+              />
+              <PasswordInput
+                mt="md"
+                label="Password"
+                description="Passwords are case-sensitive." 
+                placeholder="Enter your password"
+                {...form.getInputProps('password')}
+              />
+            </Stepper.Step>
 
-        <Stepper.Completed>
-          {notification && (
-            <Notification icon={notification.icon} color={notification.color} title={notification.title} mt="md">
-              {notification.message}
-            </Notification>
-          )}
-        </Stepper.Completed>
-      </Stepper>
+            <Stepper.Completed>
+              {notification && (
+                <Notification icon={notification.icon} color={notification.color} title={notification.title} mt="md">
+                  {notification.message}
+                </Notification>
+              )}
+            </Stepper.Completed>
+          </Stepper>
 
-      <Group mt="xl">
-        {active !== 0 && (
-          <Button variant="default" onClick={prevStep}>Back</Button>
-        )}
-        {active === 1 ? (
-          <Button onClick={handleLogin} loading={loading}>
-            {loading ? 'Logging in...' : 'Submit'}
-          </Button>
-        ) : (
-          <Button onClick={nextStep}>Next</Button>
-        )}
-      </Group>
-    </Container>
+          <Group mt="xl">
+            {active !== 0 && (
+              <Button variant="default" onClick={prevStep}>Back</Button>
+            )}
+            {active === 1 ? (
+              <Button onClick={handleLogin} loading={loading}>
+                {loading ? 'Logging in...' : 'Submit'}
+              </Button>
+            ) : (
+              <Button onClick={nextStep}>Next</Button>
+            )}
+          </Group>
+
+          {/* 8. This is the new "Sign up" link */}
+          <Text ta="center" mt="lg">
+            Don't have an account?{' '}
+            <Anchor component={Link} to="/signup">
+              Sign up
+            </Anchor>
+          </Text>
+
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 

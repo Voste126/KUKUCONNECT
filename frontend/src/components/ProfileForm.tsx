@@ -55,7 +55,7 @@ const ProfileForm: React.FC<ProfileProps> = ({ userType }) => {
   const navigate = useNavigate();
   const token = localStorage.getItem('accessToken');
 
-  const apiUrl = `${BASE_URL}/api/profiles/${userType === 'farmer' ? 'farmer' : 'buyer'}/`;
+  const apiUrl = `${BASE_URL}/api/profiles/${userType === 'farmer' ? 'farmers' : 'buyers'}/`;
 
   const form = useForm<ProfileFormValues>({
     initialValues: {

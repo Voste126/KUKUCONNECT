@@ -1,99 +1,116 @@
+/* src/components/DoubleNavbar.module.css */
+
 .navbar {
-  background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
-  height: 750px;
-  width: 300px;
+  height: 100vh;
+  width: 300px; /* This is the total width from AppShell */
   display: flex;
   flex-direction: column;
-  border-right: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-8));
+  border-right: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-7));
 }
 
 .wrapper {
   display: flex;
   flex: 1;
+  overflow: hidden; /* Prevent double scrollbars */
 }
 
-.aside {
-  flex: 0 0 60px;
-  background-color: var(--mantine-color-body);
+.header {
+  padding: var(--mantine-spacing-md);
+  border-bottom: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-7));
+}
+
+.main {
+  flex: 0 0 80px; /* Width of the icon bar */
   display: flex;
   flex-direction: column;
   align-items: center;
   border-right: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-7));
-}
-
-.main {
-  flex: 1;
-  background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+  background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8));
+  padding-top: var(--mantine-spacing-md);
 }
 
 .mainLink {
-  width: 44px;
-  height: 44px;
+  width: 50px;
+  height: 50px;
   border-radius: var(--mantine-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  margin-bottom: var(--mantine-spacing-sm);
 
   &:hover {
-    background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-5));
+    background-color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-6));
   }
 
   &[data-active] {
-    &,
-    &:hover {
-      background-color: var(--mantine-color-blue-light);
-      color: var(--mantine-color-blue-light-color);
-    }
+    /* Use your theme's primary color */
+    background-color: var(--mantine-color-green-filled); 
+    color: var(--mantine-color-white);
   }
 }
 
-.title {
-  font-family:
-    Greycliff CF,
-    var(--mantine-font-family);
-  margin-bottom: var(--mantine-spacing-xl);
-  background-color: var(--mantine-color-body);
-  padding: var(--mantine-spacing-md);
-  padding-top: 18px;
-  height: 60px;
-  border-bottom: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-7));
+.links {
+  flex: 1; /* Takes remaining width */
+  overflow-y: auto; /* Allows scrolling for links */
+  background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-9));
 }
 
-.logo {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  height: 60px;
-  padding-top: var(--mantine-spacing-md);
-  border-bottom: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-7));
-  margin-bottom: var(--mantine-spacing-xl);
+.linksInner {
+ padding: var(--mantine-spacing-md);
 }
 
 .link {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
   text-decoration: none;
-  border-top-right-radius: var(--mantine-radius-md);
-  border-bottom-right-radius: var(--mantine-radius-md);
-  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
-  padding: 0 var(--mantine-spacing-md);
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+  border-radius: var(--mantine-radius-md);
   font-size: var(--mantine-font-size-sm);
-  margin-right: var(--mantine-spacing-md);
   font-weight: 500;
-  height: 44px;
-  line-height: 44px;
+  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
+  line-height: 1.4;
+  margin-bottom: var(--mantine-spacing-xs);
 
   &:hover {
-    background-color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
-    color: light-dark(var(--mantine-color-dark), var(--mantine-color-light));
+    background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
   }
 
   &[data-active] {
-    &,
-    &:hover {
-      border-left-color: var(--mantine-color-blue-filled);
-      background-color: var(--mantine-color-blue-filled);
-      color: var(--mantine-color-white);
-    }
+    /* Use your theme's primary color */
+    background-color: var(--mantine-color-green-light); 
+    color: light-dark(var(--mantine-color-green-filled), var(--mantine-color-green-0));
+  }
+}
+
+.linkIcon {
+  width: 20px;
+  height: 20px;
+}
+
+.footer {
+  border-top: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-7));
+  padding: var(--mantine-spacing-md);
+  background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-8));
+}
+
+.footerLink {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+  text-decoration: none;
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+  border-radius: var(--mantine-radius-md);
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 500;
+  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
+
+  &:hover {
+    background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
   }
 }

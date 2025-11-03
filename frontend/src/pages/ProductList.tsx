@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, TextInput, Select, Container, Grid, Table, Card, NumberInput, Group } from '@mantine/core';
+import { Button, TextInput, Select, Grid, Table, Card, NumberInput, Group } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import BASE_URL from '@/config';
@@ -40,12 +40,6 @@ const ProductList: React.FC = () => {
         console.error(error);
       }
     }
-    // fetch('http://localhost:8000/api/products/')
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     setProducts(data);
-    //     setFilteredProducts(data);
-    //   });
     fetchProducts();
   }, [token]);
 
@@ -91,102 +85,112 @@ const ProductList: React.FC = () => {
   };
 
   return (
-    <Container  style={{marginTop: '0.25rem'}}>
-      <h2>Product List</h2>
+    // 1. Replaced <Container> with a <Grid> to fill the page.
+    //    Added padding and gutter for spacing.
+    <Grid gutter="xl" style={{ padding: '20px', marginTop: '0.25rem' }}>
+      
+      {/* 2. Main content column (products and filters) */}
+      <Grid.Col span={{ base: 12, md: 9 }}>
+        <h2 style={{ textAlign: 'center' }}>Product List</h2>
 
-      {/* Filters Section */}
-      <Card withBorder shadow="sm" padding="lg" mb="lg" style={{marginTop: '0.5rem'}}>
+        {/* Filters Section */}
+        <Card withBorder shadow="sm" padding="lg" mb="lg" style={{marginTop: '0.5rem'}}>
+          <Grid>
+            <Grid.Col span={{ base: 12, sm: 4 }}>
+              <TextInput
+                label="Search by Title"
+                placeholder="Enter product title"
+                value={filter.title}
+                onChange={(e) => setFilter({ ...filter, title: e.target.value })}
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, sm: 4 }}>
+              <Select
+                label="Filter by Category"
+                placeholder="Select category"
+                data={[
+                  { value: 'fruits', label: 'Fruits' },
+                  { value: 'vegetables', label: 'Vegetables' },
+                  { value: 'dairy', label: 'Dairy' },
+                  { value: 'others', label: 'Others' },
+                ]}
+                value={filter.category}
+                onChange={(value) => setFilter({ ...filter, category: value || '' })}
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, sm: 4 }}>
+              <NumberInput
+                label="Max Price"
+                placeholder="Enter maximum price"
+                value={filter.price}
+                onChange={(value) => setFilter({ ...filter, price: value ? value.toString() : '' })}
+              />
+            </Grid.Col>
+          </Grid>
+          <Group mt="lg">
+            <Button onClick={handleFilter}>Apply Filters</Button>
+          </Group>
+        </Card>
+
+        {/* Products Grid */}
         <Grid>
-          <Grid.Col span={4}>
-            <TextInput
-              label="Search by Title"
-              placeholder="Enter product title"
-              value={filter.title}
-              onChange={(e) => setFilter({ ...filter, title: e.target.value })}
-            />
-          </Grid.Col>
-          <Grid.Col span={4}>
-            <Select
-              label="Filter by Category"
-              placeholder="Select category"
-              data={[
-                { value: 'fruits', label: 'Fruits' },
-                { value: 'vegetables', label: 'Vegetables' },
-                { value: 'dairy', label: 'Dairy' },
-                { value: 'others', label: 'Others' },
-              ]}
-              value={filter.category}
-              onChange={(value) => setFilter({ ...filter, category: value || '' })}
-            />
-          </Grid.Col>
-          <Grid.Col span={4}>
-            <NumberInput
-              label="Max Price"
-              placeholder="Enter maximum price"
-              value={filter.price}
-              onChange={(value) => setFilter({ ...filter, price: value ? value.toString() : '' })}
-            />
-          </Grid.Col>
+          {filteredProducts.map((product) => (
+            // 3. Made product cards responsive
+            <Grid.Col key={product.id} span={{ base: 12, sm: 6, lg: 4 }}>
+              <Card withBorder shadow="sm" padding="lg">
+                <h3>{product.title}</h3>
+                <p>{product.description}</p>
+                <p>Category: {product.category}</p>
+                <p>Price: ${product.price}</p>
+                <p>Stock: {product.stock}</p>
+                <Button
+                  fullWidth
+                  mt="lg"
+                  onClick={() => addToCart(product)}
+                >
+                  Add to Cart
+                </Button>
+              </Card>
+            </Grid.Col>
+          ))}
         </Grid>
-        <Group  mt="lg">
-          <Button onClick={handleFilter}>Apply Filters</Button>
-        </Group>
-      </Card>
+      </Grid.Col>
 
-      {/* Products Grid */}
-      <Grid>
-        {filteredProducts.map((product) => (
-          <Grid.Col key={product.id} span={4}>
-            <Card withBorder shadow="sm" padding="lg">
-              <h3>{product.title}</h3>
-              <p>{product.description}</p>
-              <p>Category: {product.category}</p>
-              <p>Price: ${product.price}</p>
-              <p>Stock: {product.stock}</p>
-              <Button
-                fullWidth
-                mt="lg"
-                onClick={() => addToCart(product)}
-              >
-                Add to Cart
-              </Button>
-            </Card>
-          </Grid.Col>
-        ))}
-      </Grid>
-
-      {/* Cart Section */}
-      <div style={{ position: 'fixed', top: 20, right: 20, width: 300, marginTop: '5rem' }}>
-        <h3>Shopping Cart</h3>
-        <Table>
-          <thead>
-            <tr>
-              <th>Item</th>
-              <th>Qty</th>
-              <th>Price</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cart.map((item) => (
-              <tr key={item.id}>
-                <td>{item.title}</td>
-                <td>{item.quantity}</td>
-                <td>${(item.price * (item.quantity || 0)).toFixed(2)}</td>
+      {/* 4. Cart column (sidebar) */}
+      <Grid.Col span={{ base: 12, md: 3 }}>
+        {/* 5. Made cart 'sticky' so it stays in view while scrolling */}
+        <div style={{ position: 'sticky', top: 20, width: '100%' }}>
+          <h3>Shopping Cart</h3>
+          <Table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Price</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
-        <h4>Total: ${getTotalPrice()}</h4>
-        <Button
-          fullWidth
-          onClick={() =>
-            navigate('/checkout', { state: { cart, totalPrice: getTotalPrice() } })
-          }
-        >
-          Complete Order
-        </Button>
-      </div>
-    </Container>
+            </thead>
+            <tbody>
+              {cart.map((item) => (
+                <tr key={item.id}>
+                  <td>{item.title}</td>
+                  <td>{item.quantity}</td>
+                  <td>${(item.price * (item.quantity || 0)).toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+          <h4>Total: ${getTotalPrice()}</h4>
+          <Button
+            fullWidth
+            onClick={() =>
+              navigate('/checkout', { state: { cart, totalPrice: getTotalPrice() } })
+            }
+          >
+            Complete Order
+          </Button>
+        </div>
+      </Grid.Col>
+    </Grid>
   );
 };
 
