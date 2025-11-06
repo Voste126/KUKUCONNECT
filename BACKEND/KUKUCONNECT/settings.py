@@ -14,22 +14,29 @@ from pathlib import Path
 from datetime import timedelta
 import os
 import dj_database_url
-
+from dotenv import load_dotenv  # <-- ADDED: To read .env file
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# ADDED: Load environment variables from .env file for local development
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-x+5fh32v2@su4$d&3cvydn%kdn9p$x546de6h%-uhamnj30fnp'
+# FIXED (A05): Now reads from environment variable.
+# !! YOU MUST CHANGE THIS VALUE in your .env and on Render !!
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# FIXED (A05): Now reads from environment variable, defaults to False.
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['*']
+# FIXED (A05): Now reads from environment variable.
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -54,8 +61,15 @@ INSTALLED_APPS = [
     'chatbot',
 ]
 
+# ---
+# <-- FIX: 1 of 2
+# Moved 'corsheaders.middleware.CorsMiddleware' to the top.
+# This ensures it runs before 'CommonMiddleware' and prevents
+# the 301 redirects on your OPTIONS requests.
+# ---
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # <-- MOVED HERE
     "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -63,7 +77,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+    # 'corsheaders.middleware.CorsMiddleware', # <-- REMOVED FROM HERE
 ]
 
 ROOT_URLCONF = 'KUKUCONNECT.urls'
@@ -86,37 +100,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'KUKUCONNECT.wsgi.application'
 
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "https://kukuconnect-frontend.onrender.com",
-]
+# FIXED (A05): Set to False. This forces Django to use the explicit list below.
+CORS_ALLOW_ALL_ORIGINS = False
+
+# FIXED (A05): Now reads from environment variable.
+CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:3000').split(',')
 
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
-# # postgres database
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'kukuconnectdb',
-#         'USER': 'postgres',
-#         'PASSWORD': 'postgres',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
-
-# Database
+# This logic is good and already reads from environment variables. No changes needed.
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 if DATABASE_URL:
@@ -140,12 +134,20 @@ else:
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
+# ---
+# FIXED: A07: IDENTIFICATION AND AUTHENTICATION FAILURES
+# Updated to enforce stronger password policies.
+# ---
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        # Enforce a stronger minimum length
+        'OPTIONS': {
+            'min_length': 10,
+        }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -201,7 +203,8 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
     'ALGORITHM': 'HS256',
-    'SIGNING_KEY': SECRET_KEY,
+    # This is correct. It reads the SECRET_KEY variable from the top of this file.
+    'SIGNING_KEY': SECRET_KEY, 
     'VERIFYING_KEY': None,
     'AUDIENCE': None,
     'ISSUER': None,
@@ -212,44 +215,113 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
 
+# ---
+# NEWLY ADDED
+# FIXED: A09: SECURITY LOGGING AND MONITORING FAILURES
+# Configures logging to capture warnings, errors, and security events.
+# In production (on Render), this will output to the console,
+# which is captured by Render's Log Stream.
+# ---
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    
+    # How to format the log messages
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    
+    # Where to send the logs
+    'handlers': {
+        # Handler 1: Log to the console (for Render)
+        'console': {
+            'level': 'INFO', # Capture INFO and above
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        # Handler 2: Log to a file (for local debugging)
+        'file': {
+            'level': 'WARNING', # Only log WARNING and above to the file
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'django_security.log'),
+            'formatter': 'verbose',
+        },
+    },
+    
+    # Which loggers to use
+    'loggers': {
+        # 1. The general Django logger
+        'django': {
+            'handlers': ['console', 'file'], # Send to both console and file
+            'level': 'INFO', # Log INFO, WARNING, ERROR, CRITICAL
+            'propagate': True,
+        },
+        # 2. A specific logger for security events
+        'django.security': {
+            'handlers': ['console', 'file'],
+            'level': 'WARNING', # Capture all security warnings
+            'propagate': False,
+        },
+        # 3. Logger for your own apps (optional, but good practice)
+        'users': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+        'products': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+        'profiles': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+    },
+}
 
 
+# This section is already correctly reading from environment variables. No changes needed.
 MPESA_ENVIRONMENT = os.environ.get('MPESA_ENVIRONMENT')
-
-# Credentials for the daraja app
-
 MPESA_CONSUMER_KEY = os.environ.get('MPESA_CONSUMER_KEY')
 MPESA_CONSUMER_SECRET = os.environ.get('MPESA_CONSUMER_SECRET')
-
-#Shortcode to use for transactions. For sandbox  use the Shortcode 1 provided on test credentials page
-
 MPESA_SHORTCODE = os.environ.get('MPESA_SHORTCODE')
-
-# Shortcode to use for Lipa na MPESA Online (MPESA Express) transactions
-# This is only used on sandbox, do not set this variable in production
-# For sandbox use the Lipa na MPESA Online Shorcode provided on test credentials page
-
 MPESA_EXPRESS_SHORTCODE = os.environ.get('MPESA_EXPRESS_SHORTCODE')
-
-# Type of shortcode
-# Possible values:
-# - paybill (For Paybill)
-# - till_number (For Buy Goods Till Number)
-
 MPESA_SHORTCODE_TYPE = os.environ.get('MPESA_SHORTCODE_TYPE')
-
-# Lipa na MPESA Online passkey
-# Sandbox passkey is available on test credentials page
-# Production passkey is sent via email once you go live
-
 MPESA_PASSKEY = os.environ.get('MPESA_PASSKEY')
-
-# Username for initiator (to be used in B2C, B2B, AccountBalance and TransactionStatusQuery Transactions)
-
 MPESA_INITIATOR_USERNAME = os.environ.get('MPESA_INITIATOR_NAME')
-
-# Plaintext password for initiator (to be used in B2C, B2B, AccountBalance and TransactionStatusQuery Transactions)
-
 MPESA_INITIATOR_SECURITY_CREDENTIAL = os.environ.get('MPESA_INITIATOR_PASSWORD')
-
 MPESA_PHONE_NUMBER = os.environ.get('MPESA_PHONE_NUMBER')
+
+# ---
+# FIXED: A02: CRYPTOGRAPHIC FAILURES
+# Added Production-Only Security Settings to enforce HTTPS.
+# ---
+if not DEBUG:
+    # ---
+    # <-- FIX: 2 of 2
+    # Corrected the typo 'httpsfs' to 'https'
+    # ---
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    
+    # 1. Force all connections to be over HTTPS (SSL)
+    SECURE_SSL_REDIRECT = True
+    
+    # 2. Tell the browser to only send session cookies over HTTPS
+    SESSION_COOKIE_SECURE = True
+    
+    # 3. Tell the browser to only send the CSRF cookie over HTTPS
+    CSRF_COOKIE_SECURE = True
+    
+    # 4. Enable HTTP Strict Transport Security (HSTS)
+    SECURE_HSTS_SECONDS = 3600  # 1 hour
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True

@@ -1,76 +1,140 @@
-import './App.css';
-import React from 'react';
-// Core styles are required for all packages
-import { AppShell, Title, Burger, Flex, Button, useMantineColorScheme, useComputedColorScheme } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { FaMoon, FaSun } from 'react-icons/fa';
-import chickenLogo from './assets/KCNlogo.png';
-import { DoubleNavbar } from './components/Navbar';
-const RouterSwitcher = React.lazy(() => import('./components/RouterSwitcher'));
-function App() {
-  
-  const [opened, { toggle }] = useDisclosure();
-  const { setColorScheme } = useMantineColorScheme();
-  const computedColorScheme = useComputedColorScheme();
+import { AppShell } from '@mantine/core';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+// ---
+// THE FIX: Import DoubleNavbar instead of Navbar
+// ---
+import { DoubleNavbar } from './components/DoubleNavbar'; 
+import { LoginPage } from './components/LoginForm'; 
+import { SignupPage } from './components/SignUpPage';
+import Dashboard from './components/Dashboard';
+import Logout from './components/Logout';
+import ProfileForm from './components/ProfileForm';
+import HomeButton from './components/HomeButton';
+import ProductList from './pages/ProductList'; 
+import Checkout from './pages/Checkout';
+import Cart from './pages/Cart';
 
-  const toggleColorScheme = () => {
-    setColorScheme(computedColorScheme === 'dark' ? 'light' : 'dark');
-  };
+/**
+ * Helper function to get auth state from localStorage
+ */
+const getAuth = () => {
+  const token = localStorage.getItem('accessToken');
+  const role = localStorage.getItem('userRole');
+  return { token, role };
+};
+
+const ProfilePage = () => {
+    const role = localStorage.getItem('userRole') as 'farmer' | 'buyer';
+    if (!role) return <Navigate to="/login" />;
+    return (
+      <div style={{ padding: '20px' }}>
+        <ProfileForm userType={role} />
+      </div>
+    );
+};
+
+const NotFoundPage = () => (
+  <div style={{ padding: '20px', textAlign: 'center' }}>
+    <h1>404 - Page Not Found</h1>
+    <p>The page you are looking for does not exist.</p>
+  </div>
+);
+
+
+// ---
+// App Layouts
+// ---
+
+/**
+ * For GUEST pages (Home, Login, Signup).
+ */
+const GuestLayout = () => {
+  const { token, role } = getAuth(); 
+
+  if (!token) {
+    return <Outlet />; // Not logged in, show guest page
+  }
+  
+  // If logged in, redirect based on role
+  const redirectTo = role === 'farmer' ? '/dashboard' : '/digital-market';
+  return <Navigate to={redirectTo} replace />;
+};
+
+/**
+ * For AUTHENTICATED pages (the main app).
+ */
+const AppLayout = () => {
+  const { token } = getAuth();
+  
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
-    <>
-      <AppShell
-        header={{ height: 60 }}
-        navbar={{
-          width: 300,
-          breakpoint: 'sm',
-          collapsed: { mobile: !opened },
-        }}
-        padding="md"
-      >
-        <AppShell.Header>
-          <Flex
-            justify="flex-start"  // Align items to the left
-            align="center"
-            style={{ padding: '10px 20px' }}
-          >
-            <img
-              src={chickenLogo}
-              alt="KUKUCONNECT"
-              style={{ width: '50px', height: '50px', marginRight: '10px' }}
-            />
-            <Title order={3} style={{ marginRight: 'auto' }}>KUKUCONNECT</Title> {/* Added marginRight: 'auto' for left alignment */}
-            <Burger opened={opened} onClick={toggle} hiddenFrom="sm" />
-            <Button
-              size="sm"
-              variant="filled"
-              onClick={toggleColorScheme}
-              style={{ backgroundColor: 'green' }}
-            >
-              {computedColorScheme === 'dark' ? <FaSun /> : <FaMoon />}
-            </Button>
-          </Flex>
-        </AppShell.Header>
+    <AppShell
+      navbar={{
+        width: 300, // This width matches the DoubleNavbar CSS
+        breakpoint: 'sm',
+      }}
+      padding="md" // This provides the top margin
+    >
+      <AppShell.Navbar>
+        {/* ---
+          THE FIX: Render <DoubleNavbar /> here
+        --- */}
+        <DoubleNavbar /> 
+      </AppShell.Navbar>
+      <AppShell.Main>
+        <Outlet />
+      </AppShell.Main>
+    </AppShell>
+  );
+};
 
-        <AppShell.Navbar>
-          <DoubleNavbar />
-        </AppShell.Navbar>
+/**
+ * For pages ONLY a FARMER can see.
+ */
+const FarmerOnlyLayout = () => {
+  const { role } = getAuth();
+  if (role !== 'farmer') {
+    return <Navigate to="/digital-market" replace />;
+  }
+  return <Outlet />;
+};
 
-        <AppShell.Main>
-          <React.Suspense fallback="Loading...">
-            <RouterSwitcher />
-          </React.Suspense>
-        </AppShell.Main>
 
-        <AppShell.Footer>
-          <Flex justify="center" align="center" style={{ padding: '10px 20px' }}>
-            <p>&copy; 2024 KUKUCONNECT</p>
-          </Flex>
-        </AppShell.Footer>
-      </AppShell>
-    </>
+/**
+ * Main App Component
+ */
+function App() {
+  return (
+    <Routes>
+      {/* === Guest-Only Routes (No Navbar) === */}
+      <Route element={<GuestLayout />}>
+        <Route path="/" element={<HomeButton />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+      </Route>
+
+      {/* === Authenticated App Routes (With Navbar) === */}
+      <Route element={<AppLayout />}>
+        {/* Routes for all logged-in users */}
+        <Route path="/digital-market" element={<ProductList />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/logout" element={<Logout />} />
+        
+        {/* Farmer-Only Routes (nested) */}
+        <Route element={<FarmerOnlyLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Route>
+      </Route>
+
+      {/* === Catch-all 404 === */}
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
   );
 }
 
 export default App;
-
