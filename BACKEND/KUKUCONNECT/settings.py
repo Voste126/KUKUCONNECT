@@ -116,6 +116,7 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 if DATABASE_URL:
     # Use the database settings from DATABASE_URL in production
     DATABASES = {
+        
         'default': dj_database_url.config(default=DATABASE_URL)
     }
 else:

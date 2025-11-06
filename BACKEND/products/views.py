@@ -29,6 +29,7 @@ class ProductEditView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProductSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+
     # ---
     # FIXED: BROKEN ACCESS CONTROL
     # This function ensures that the logged-in user can ONLY see,

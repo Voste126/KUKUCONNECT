@@ -83,6 +83,25 @@ This document details the security measures implemented in the KUKUCONNECT API, 
   - **SQLi:** Django ORM parameterizes all queries, preventing SQL injection.  
   - **XSS:** React escapes all user-supplied data by default, preventing malicious script execution.
 
+* **Code Snippet Example (SQLi Prevention):**  
+  This snippet from `BACKEND/products/views.py` shows how the Django ORM is used. The `.filter(farmer=user)` method constructs a parameterized SQL query, ensuring that the `user` variable is treated as data, not as executable SQL code. This inherently prevents SQL injection vulnerabilities.
+
+    ```python
+    # BACKEND/products/views.py
+    class ProductEditView(generics.RetrieveUpdateDestroyAPIView):
+        # ... (other code) ...
+        def get_queryset(self):
+            """
+            This view should only return products owned by the authenticated user.
+            """
+            user = self.request.user
+            if user.is_authenticated:
+                # This line uses the ORM to filter securely.
+                # The 'user' variable is parameterized, not concatenated.
+                return self.queryset.filter(farmer=user)
+            return Product.objects.none()
+    ```
+
 ---
 
 ### A04: Insecure Design
